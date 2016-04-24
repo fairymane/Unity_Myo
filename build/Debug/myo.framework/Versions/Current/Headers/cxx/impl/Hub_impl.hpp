@@ -154,8 +154,7 @@ void Hub::onDeviceEvent(libmyo_event_t event)
         case libmyo_event_locked:
             listener->onLock(myo, time);
             break;
-        case libmyo_event_orientation:{
-            /*
+        case libmyo_event_orientation:
             listener->onOrientationData(myo, time,
                                         Quaternion<float>(libmyo_event_get_orientation(event, libmyo_orientation_x),
                                                           libmyo_event_get_orientation(event, libmyo_orientation_y),
@@ -170,36 +169,8 @@ void Hub::onDeviceEvent(libmyo_event_t event)
                                       Vector3<float>(libmyo_event_get_gyroscope(event, 0),
                                                      libmyo_event_get_gyroscope(event, 1),
                                                      libmyo_event_get_gyroscope(event, 2)));
-            */          
-            listener->onIMG(myo, time,
-                                        Vector3<float>(libmyo_event_get_accelerometer(event, 0),
-                                                         libmyo_event_get_accelerometer(event, 1),
-                                                         libmyo_event_get_accelerometer(event, 2)),
-                                        Vector3<float>(libmyo_event_get_accelerometer(event, 0),
-                                                         libmyo_event_get_accelerometer(event, 1),
-                                                         libmyo_event_get_accelerometer(event, 2)),
-                                        Quaternion<float>(libmyo_event_get_orientation(event, libmyo_orientation_x),
-                                                          libmyo_event_get_orientation(event, libmyo_orientation_y),
-                                                          libmyo_event_get_orientation(event, libmyo_orientation_z),
-                                                          libmyo_event_get_orientation(event, libmyo_orientation_w))
-
-                            );
-            
-            /*  
-            int8_t emg[] = { libmyo_event_get_emg(event, 0),
-                             libmyo_event_get_emg(event, 1),
-                             libmyo_event_get_emg(event, 2),
-                             libmyo_event_get_emg(event, 3),
-                             libmyo_event_get_emg(event, 4),
-                             libmyo_event_get_emg(event, 5),
-                             libmyo_event_get_emg(event, 6),
-                             libmyo_event_get_emg(event, 7) };
-            listener->onEmgData(myo, time, emg);
-            */
-            
 
             break;
-        }
         case libmyo_event_pose:
             listener->onPose(myo, time, Pose(static_cast<Pose::Type>(libmyo_event_get_pose(event))));
             break;
@@ -234,7 +205,6 @@ void Hub::run(unsigned int duration_ms)
             return libmyo_handler_continue;
         }
     };
-
     libmyo_run(_hub, duration_ms, &local::handler, this, ThrowOnError());
 }
 

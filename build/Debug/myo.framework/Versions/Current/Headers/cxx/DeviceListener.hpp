@@ -122,16 +122,12 @@ public:
     /// @param gyro The gyroscope data of \a myo, in units of deg/s.
     virtual void onGyroscopeData(Myo* myo, uint64_t timestamp, const Vector3<float>& gyro) {}
 
-
-
-
     /// Called when a paired Myo has provided a new RSSI value.
     /// @param myo The Myo for this event.
     /// @param timestamp The timestamp of the event. Timestamps are 64 bit unsigned integers that correspond to a number
     /// of microseconds since some (unspecified) period in time. Timestamps are monotonically non-decreasing.
     /// @param rssi The RSSI (received signal strength indication) of \a myo.
     /// @see Myo::requestRssi() to request an RSSI value from the Myo.
-
     virtual void onRssi(Myo* myo, uint64_t timestamp, int8_t rssi) {}
 
     /// Called when a paired Myo has provided new EMG data.
@@ -144,9 +140,6 @@ public:
     /// @cond LIBMYO_INTERNALS
 
     virtual void onOpaqueEvent(libmyo_event_t event) {}
-
-    virtual void onIMG(myo::Myo* myo, uint64_t timestamp, const myo::Vector3<float>& accel, const myo::Vector3<float>& gyro, const myo::Quaternion<float>& quat){}
-
 
     /// @endcond
 };

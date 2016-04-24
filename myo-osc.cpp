@@ -24,6 +24,7 @@
 #include <iomanip>
 #include <stdexcept>
 #include <string>
+#include <ostream>
 
 // The only file that needs to be included to use the Myo C++ SDK is myo.hpp.
 #include <myo/myo.hpp>
@@ -48,6 +49,48 @@ public:
 
     
 	// units of g
+
+    
+    void onIMG(myo::Myo* myo, uint64_t timestamp, const myo::Vector3<float>& accel, const myo::Vector3<float>& gyro, const myo::Quaternion<float>& quat)
+    {
+        a_x = accel.x();
+        a_y = accel.y();
+        a_z = accel.z();
+
+        g_x = gyro.x();
+        g_y = gyro.y();
+        g_z = gyro.z();
+
+        using std::atan2;
+        using std::asin;
+        using std::sqrt;
+
+        std::cout<<"IMG fucntion called"<<std::endl;
+        // Calculate Euler angles (roll, pitch, and yaw) from the unit quaternion.
+        float roll = atan2(2.0f * (quat.w() * quat.x() + quat.y() * quat.z()),
+                           1.0f - 2.0f * (quat.x() * quat.x() + quat.y() * quat.y()));
+        float pitch = asin(2.0f * (quat.w() * quat.y() - quat.z() * quat.x()));
+        float yaw = atan2(2.0f * (quat.w() * quat.z() + quat.x() * quat.y()),
+                        1.0f - 2.0f * (quat.y() * quat.y() + quat.z() * quat.z()));
+
+        osc::OutboundPacketStream p(buffer, OUTPUT_BUFFER_SIZE);
+        p << osc::BeginMessage("/myo/IMG")
+        << MAC
+        << a_x << a_y << a_z
+        << g_x << g_y << g_z 
+        << quat.x() << quat.y() << quat.z() << quat.w() << roll << pitch << yaw << osc::EndMessage;
+
+        transmitSocket->Send(p.Data(), p.Size());
+        // Convert the floating point angles in radians to a scale from 0 to 20.
+        roll_w = static_cast<int>((roll + (float)M_PI)/(M_PI * 2.0f) * 18);
+        pitch_w = static_cast<int>((pitch + (float)M_PI/2.0f)/M_PI * 18);
+        yaw_w = static_cast<int>((yaw + (float)M_PI)/(M_PI * 2.0f) * 18);
+
+
+    }
+    
+    
+    
 	void onAccelerometerData(myo::Myo* myo, uint64_t timestamp, const myo::Vector3<float>& accel)
 	{
 		a_x = accel.x();
@@ -102,6 +145,7 @@ public:
         pitch_w = static_cast<int>((pitch + (float)M_PI/2.0f)/M_PI * 18);
         yaw_w = static_cast<int>((yaw + (float)M_PI)/(M_PI * 2.0f) * 18);
     }
+    
 
     // onPose() is called whenever the Myo detects that the person wearing it has changed their pose, for example,
     // making a fist, or not making a fist anymore.
@@ -121,15 +165,15 @@ public:
         }
     }
   
-  void onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t* emg) override {
-    osc::OutboundPacketStream p(buffer, OUTPUT_BUFFER_SIZE);
-    p << osc::BeginMessage("/myo/emg")
-      << MAC
-      << emg[0] << emg[1] << emg[2] << emg[3]
-      << emg[4] << emg[5] << emg[6] << emg[7]
-      << osc::EndMessage;
-    transmitSocket->Send(p.Data(), p.Size());
-  }
+    void onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t* emg) override {
+        osc::OutboundPacketStream p(buffer, OUTPUT_BUFFER_SIZE);
+        p << osc::BeginMessage("/myo/emg")
+        << MAC
+        << emg[0] << emg[1] << emg[2] << emg[3]
+        << emg[4] << emg[5] << emg[6] << emg[7]
+        << osc::EndMessage;
+        transmitSocket->Send(p.Data(), p.Size());
+    }
 
     // onArmRecognized() is called whenever Myo has recognized a setup gesture after someone has put it on their
     // arm. This lets Myo know which arm it's on and which way it's facing.
@@ -186,7 +230,7 @@ public:
             // Print out a placeholder for the arm and pose when Myo doesn't currently know which arm it's on.
             std::cout << "[?]" << '[' << std::string(14, ' ') << ']';
         }
-        std::cout<< "row_w: "<<row_w <<" pitch_w: "<<pitch_w << " yaw_w: "<<yaw_w; 
+        std::cout<< "row_w: "<<roll_w <<" pitch_w: "<<pitch_w << " yaw_w: "<<yaw_w; 
         std::cout << std::flush;
     }
 
@@ -218,7 +262,7 @@ int main(int argc, char** argv)
 				if (argc == 1)
 				{
 					int port = 7777;
-					std::cout << "Sending Myo OSC to 127.0.0.1:7777\n";
+					std::cout << "Sending Myo OSC to 127.0.0.1:8888\n";
 					transmitSocket = new UdpTransmitSocket(IpEndpointName("127.0.0.1", port));
 				}
 				else if (argc == 2)

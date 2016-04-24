@@ -44,6 +44,7 @@
 		2E43743A19885228006D0623 /* OscTypes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OscTypes.cpp; path = osc/OscTypes.cpp; sourceTree = SOURCE_ROOT; };
 		4D04ADE419266DE6006E1C84 /* myo-osc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "myo-osc.cpp"; sourceTree = SOURCE_ROOT; };
 		4D1F5A95192655EE002845BB /* myo-osc */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "myo-osc"; sourceTree = BUILT_PRODUCTS_DIR; };
+		7264F88B1CCD5B4C00266B5A /* myo-osc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "myo-osc.cpp"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -64,6 +65,7 @@
 				4D1F5A97192655EE002845BB /* myo-osc */,
 				4D1F5AA31926563B002845BB /* Frameworks */,
 				4D1F5A96192655EE002845BB /* Products */,
+				7264F88B1CCD5B4C00266B5A /* myo-osc.cpp */,
 			);
 			sourceTree = "<group>";
 		};
@@ -125,7 +127,7 @@
 		4D1F5A8D192655EE002845BB /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0510;
+				LastUpgradeCheck = 0730;
 				ORGANIZATIONNAME = "Thalmic Labs";
 			};
 			buildConfigurationList = 4D1F5A90192655EE002845BB /* Build configuration list for PBXProject "myo-osc" */;
@@ -168,7 +170,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
@@ -182,6 +183,7 @@
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
@@ -212,7 +214,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;

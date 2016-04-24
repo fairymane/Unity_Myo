@@ -1,8 +1,12 @@
 import OSC
-
+import pandas
+import datetime
+import time
 def handler(addr, tags, data, client_address):
     txt = "OSCMessage '%s' from %s: " % (addr, client_address)
+    txt += datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S ")
     txt += str(data)
+    print time.time()
     print(txt)
 
 if __name__ == "__main__":
@@ -10,6 +14,7 @@ if __name__ == "__main__":
     #s = OSC.OSCServer(('192.168.70.53', 8000))  # listen on localhost, port 57120
     s.addMsgHandler('/myo/accel', handler)     # call handler() for OSC messages received with the /startup address
     s.addMsgHandler('/myo/gyro', handler)     # call handler() for OSC messages received with the /startup address
+    s.addMsgHandler('/myo/IMG', handler) 
     s.addMsgHandler('/myo/emg', handler)     # call handler() for OSC messages received with the /startup address
     s.addMsgHandler('/myo/pose', handler)     # call handler() for OSC messages received with the /startup address
     s.addMsgHandler('/myo/orientation', handler)     # call handler() for OSC messages received with the /startup address
