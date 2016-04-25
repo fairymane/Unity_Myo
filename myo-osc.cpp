@@ -75,7 +75,6 @@ public:
 
         osc::OutboundPacketStream p(buffer, OUTPUT_BUFFER_SIZE);
         p << osc::BeginMessage("/myo/IMG")
-        << MAC
         << a_x << a_y << a_z
         << g_x << g_y << g_z 
         << quat.x() << quat.y() << quat.z() << quat.w() << roll << pitch << yaw << osc::EndMessage;
@@ -88,8 +87,7 @@ public:
 
 
     }
-    
-    
+ 
     
 	void onAccelerometerData(myo::Myo* myo, uint64_t timestamp, const myo::Vector3<float>& accel)
 	{
@@ -168,7 +166,6 @@ public:
     void onEmgData(myo::Myo* myo, uint64_t timestamp, const int8_t* emg) override {
         osc::OutboundPacketStream p(buffer, OUTPUT_BUFFER_SIZE);
         p << osc::BeginMessage("/myo/emg")
-        << MAC
         << emg[0] << emg[1] << emg[2] << emg[3]
         << emg[4] << emg[5] << emg[6] << emg[7]
         << osc::EndMessage;
