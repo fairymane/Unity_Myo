@@ -77,7 +77,8 @@ public:
         p << osc::BeginMessage("/myo/IMG")
         << a_x << a_y << a_z
         << g_x << g_y << g_z 
-        << quat.x() << quat.y() << quat.z() << quat.w() << roll << pitch << yaw << osc::EndMessage;
+        << roll << pitch << yaw 
+        << quat.x() << quat.y() << quat.z() << quat.w() << osc::EndMessage;
 
         transmitSocket->Send(p.Data(), p.Size());
         // Convert the floating point angles in radians to a scale from 0 to 20.
@@ -258,7 +259,7 @@ int main(int argc, char** argv)
 
 				if (argc == 1)
 				{
-					int port = 7777;
+					int port = 8888;
 					std::cout << "Sending Myo OSC to 127.0.0.1:8888\n";
 					transmitSocket = new UdpTransmitSocket(IpEndpointName("127.0.0.1", port));
 				}
