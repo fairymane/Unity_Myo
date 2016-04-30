@@ -20,7 +20,7 @@ import pickle
 
 
 
-def plot_emg_1():
+def plot_emg_1(emg_df):
     tls.set_credentials_file(username="fairymane", api_key="x4kt8y1smu")
     global count_emg
 
@@ -255,33 +255,33 @@ def plot_emg_1():
     s8.open()
 
     jstream  = 0
-
-    while True:
-        if jstream < emgdf.shape[0] : #and jstream%3 == 0:
+    emg_len = emg_df.shape[0]
+    while jstream < emg_len:
+        #if jstream < emgdf.shape[0] : #and jstream%3 == 0:
             #print 'emgdf lenth: ', emgdf.shape[0], ' --jstream: ', jstream
             #print 'time: ', emgdf.index[jstream]
             #print 'emgdf.ix[i]: ', emgdf.ix[i]
-            x  = emgdf.index[jstream]
-            e1 = emgdf.ix[jstream][0]
-            e2 = emgdf.ix[jstream][1]
-            e3 = emgdf.ix[jstream][2]
-            e4 = emgdf.ix[jstream][3]
-            e5 = emgdf.ix[jstream][4]
-            e6 = emgdf.ix[jstream][5]
-            e7 = emgdf.ix[jstream][6]
-            e8 = emgdf.ix[jstream][7]
+        x  = emg_df.index[jstream]
+        e1 = emg_df.ix[jstream][0]
+        e2 = emg_df.ix[jstream][1]
+        e3 = emg_df.ix[jstream][2]
+        e4 = emg_df.ix[jstream][3]
+        e5 = emg_df.ix[jstream][4]
+        e6 = emg_df.ix[jstream][5]
+        e7 = emg_df.ix[jstream][6]
+        e8 = emg_df.ix[jstream][7]
 
-            s1.write(dict(x=x, y=e1))
-            s2.write(dict(x=x, y=e2))
-            s3.write(dict(x=x, y=e3))
-            s4.write(dict(x=x, y=e4))
-            s5.write(dict(x=x, y=e5))
-            s6.write(dict(x=x, y=e6))
-            s7.write(dict(x=x, y=e7))
-            s8.write(dict(x=x, y=e8))
-            
-            #time.sleep(0.08)
-            #jstream +=1
+        s1.write(dict(x=x, y=e1))
+        s2.write(dict(x=x, y=e2))
+        s3.write(dict(x=x, y=e3))
+        s4.write(dict(x=x, y=e4))
+        s5.write(dict(x=x, y=e5))
+        s6.write(dict(x=x, y=e6))
+        s7.write(dict(x=x, y=e7))
+        s8.write(dict(x=x, y=e8))
+
+        #time.sleep(0.08)
+        jstream +=1
             #if jstream == 3000:
             #    pickle.dump(emgdf , open( "myodf.p", "wb" ) )
 
@@ -401,8 +401,9 @@ def EMGHandler(addr, tags, data, client_address):
     txt += stime
     txt += str(data)
     emgdf.ix[stime] = data;
-    if(emgdf.shape[0] == 3000):
-        pickle.dump( emgdf, open( "emg.p", "wb" ) )
+    if(count_emg == 3000):
+        pickle.dump(emgdf, open( sys.argv[1], "wb" ) )
+        sys.exit()
     #print(txt)
 
 def IMGHandler(addr, tags, data, client_address):
@@ -558,7 +559,8 @@ def plot_img():
         s3.write(dict(x=x, y=y3))  
 
         s4.write(dict(x=x, y=gx_))
-        s5.write(dict(x=x, y=gy_))
+        s5.write(dict(x=x, y
+        =gy_))
         s6.write(dict(x=x, y=gz_))
 
         s7.write(dict(x=x, y=r))
@@ -578,6 +580,17 @@ def plot_img():
     s8.close() 
     s9.close()   
     """
+def offline_plot(pickle_file):
+    df = pickle.load(open(pickle_file, "rb"))
+    plot_emg_1(df)
+
+def get_stream():
+    s = OSC.OSCServer(('127.0.0.1', 8888))  # listen on localhost, port 57120
+    #s.addMsgHandler('/myo/IMG', IMGHandler) 
+    s.addMsgHandler('/myo/emg', EMGHandler)     # call handler() for OSC messages received with the /startup address
+    s.addMsgHandler('/myo/pose', handler)     # call handler() for OSC messages received with the /startup address
+
+    s.serve_forever()
 if __name__ == "__main__":
     count_emg = 0
     count_img = 0
@@ -587,23 +600,10 @@ if __name__ == "__main__":
     emg_header = ['em1', 'em2', 'em3', 'em4', 'em15', 'em6', 'em7', 'em8'] 
     emgdf = pd.DataFrame(columns= emg_header)
     imgdf = pd.DataFrame(columns= img_header )
-    global count_img
-    t_emg = threading.Thread(name='ploting_emg', target= plot_emg_1)
-    t_emg.start()
+    #global count_img
+    #t_emg = threading.Thread(name='ploting_emg', target= plot_emg_1)
+    #t_emg.start()
 
     #t_img = threading.Thread(name='ploting_img', target= plot_img)
     #t_img.start()
-
-    s = OSC.OSCServer(('127.0.0.1', 8888))  # listen on localhost, port 57120
-
-
-    #s.addMsgHandler('/myo/IMG', IMGHandler) 
-    s.addMsgHandler('/myo/emg', EMGHandler)     # call handler() for OSC messages received with the /startup address
-    s.addMsgHandler('/myo/pose', handler)     # call handler() for OSC messages received with the /startup address
-
-    s.serve_forever()
-    if count_emg  > 1000:
-        #print 'imgdc  &&&&&&&&& shape: ', imgdf.shape
-        #print imgdf
-        s.close()
-        sys.exit()
+    offline_plot(sys.argv[1])
