@@ -15,19 +15,13 @@ import time
 import sys 
 import OSC
 import threading
+import pickle
 
-
-count_emg = 0
-count_img = 0
-img_header = ['accel_x', 'accel_y', 'accel_z', 'gyro_x', 'gyro_y', 'gyro_z', 'roll', 'pitch', 'yaw', 'quat_x', 'quat_y', 'quat_z', 'quat_w' ] 
-emg_header = ['em1', 'em2', 'em3', 'em4', 'em15', 'em6', 'em7', 'em8'] 
-emgdf = pd.DataFrame(columns= emg_header)
-imgdf = pd.DataFrame(columns= img_header )
 
 
 
 def plot_emg_1():
-    #tls.set_credentials_file(username="fairymane", api_key="x4kt8y1smu")
+    tls.set_credentials_file(username="fairymane", api_key="x4kt8y1smu")
     global count_emg
 
     stream_ids = tls.get_credentials_file()['stream_ids']
@@ -285,9 +279,11 @@ def plot_emg_1():
             s6.write(dict(x=x, y=e6))
             s7.write(dict(x=x, y=e7))
             s8.write(dict(x=x, y=e8))
-
+            
             #time.sleep(0.08)
-            jstream +=1
+            #jstream +=1
+            #if jstream == 3000:
+            #    pickle.dump(emgdf , open( "myodf.p", "wb" ) )
 
     s1.close() 
     s2.close() 
@@ -405,6 +401,8 @@ def EMGHandler(addr, tags, data, client_address):
     txt += stime
     txt += str(data)
     emgdf.ix[stime] = data;
+    if(emgdf.shape[0] == 3000):
+        pickle.dump( emgdf, open( "emg.p", "wb" ) )
     #print(txt)
 
 def IMGHandler(addr, tags, data, client_address):
@@ -583,7 +581,12 @@ def plot_img():
 if __name__ == "__main__":
     count_emg = 0
     count_img = 0
-    global count_emg
+    count_emg = 0
+    count_img = 0
+    img_header = ['accel_x', 'accel_y', 'accel_z', 'gyro_x', 'gyro_y', 'gyro_z', 'roll', 'pitch', 'yaw', 'quat_x', 'quat_y', 'quat_z', 'quat_w' ] 
+    emg_header = ['em1', 'em2', 'em3', 'em4', 'em15', 'em6', 'em7', 'em8'] 
+    emgdf = pd.DataFrame(columns= emg_header)
+    imgdf = pd.DataFrame(columns= img_header )
     global count_img
     t_emg = threading.Thread(name='ploting_emg', target= plot_emg_1)
     t_emg.start()
@@ -594,7 +597,7 @@ if __name__ == "__main__":
     s = OSC.OSCServer(('127.0.0.1', 8888))  # listen on localhost, port 57120
 
 
-    s.addMsgHandler('/myo/IMG', IMGHandler) 
+    #s.addMsgHandler('/myo/IMG', IMGHandler) 
     s.addMsgHandler('/myo/emg', EMGHandler)     # call handler() for OSC messages received with the /startup address
     s.addMsgHandler('/myo/pose', handler)     # call handler() for OSC messages received with the /startup address
 
