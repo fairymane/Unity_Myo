@@ -264,8 +264,8 @@ def plot_emg_1():
 
     while True:
         if jstream < emgdf.shape[0] : #and jstream%3 == 0:
-            print 'emgdf lenth: ', emgdf.shape[0], ' --jstream: ', jstream
-            print 'time: ', emgdf.index[jstream]
+            #print 'emgdf lenth: ', emgdf.shape[0], ' --jstream: ', jstream
+            #print 'time: ', emgdf.index[jstream]
             #print 'emgdf.ix[i]: ', emgdf.ix[i]
             x  = emgdf.index[jstream]
             e1 = emgdf.ix[jstream][0]
@@ -372,8 +372,8 @@ def plot_emg():
 
     while jstream < count_emg and jstream % 3 == 0:
         if jstream < len(emgdf.index):
-            print 'table lenth: ', emgdf.shape[0] , ' --jstream: ', jstream,
-            print 'emgdf.ix[jstream]: ', emgdf.ix[jstream]
+            #print 'table lenth: ', emgdf.shape[0] , ' --jstream: ', jstream,
+            #print 'emgdf.ix[jstream]: ', emgdf.ix[jstream]
             for i in xrange(8):
                 s[i].write(dict(x= emgdf.index[jstream]  , y=emgdf.ix[jstream][i]))
             #time.sleep(0.08)
@@ -389,8 +389,8 @@ def handler(addr, tags, data, client_address):
     stime = vtime.strftime("%H:%M:%S.%f") 
     txt += stime
     txt += str(data)
-    print time.time()
-    print(txt)
+    #print time.time()
+    #print(txt)
 
 def EMGHandler(addr, tags, data, client_address):
     global count_emg
@@ -426,7 +426,7 @@ def plot_img():
 
     stream_ids = tls.get_credentials_file()['stream_ids']
 
-    print 'pring IMG!!!!'
+    #print 'pring IMG!!!!'
 
     streams = []
     traces = [] 
@@ -507,8 +507,8 @@ def plot_img():
     jstream = 0
 
     while jstream < count_img:
-        print 'count_img: ', count_img, ' --jstream: ', jstream,
-        print 'imgdf.ix[jstream]: ', imgdf.ix[jstream]
+        #print 'count_img: ', count_img, ' --jstream: ', jstream,
+        #print 'imgdf.ix[jstream]: ', imgdf.ix[jstream]
         for i in xrange(9):
             s[i].write(dict(x= imgdf.index[jstream]  , y=imgdf.ix[jstream][i]))
         #time.sleep(0.08)
@@ -600,7 +600,7 @@ if __name__ == "__main__":
 
     s.serve_forever()
     if count_emg  > 1000:
-        print 'imgdc  &&&&&&&&& shape: ', imgdf.shape
-        print imgdf
+        #print 'imgdc  &&&&&&&&& shape: ', imgdf.shape
+        #print imgdf
         s.close()
         sys.exit()
