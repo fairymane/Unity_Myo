@@ -263,7 +263,7 @@ def plot_emg_1():
     jstream  = 0
 
     while True:
-        if jstream < len(emgdf) and jstream%3 == 0:
+        if jstream < emgdf.shape[0] : #and jstream%3 == 0:
             print 'emgdf lenth: ', emgdf.shape[0], ' --jstream: ', jstream
             print 'time: ', emgdf.index[jstream]
             #print 'emgdf.ix[i]: ', emgdf.ix[i]
