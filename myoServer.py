@@ -407,18 +407,18 @@ def EMGHandler(addr, tags, data, client_address):
     #print(txt)
 
 def IMGHandler(addr, tags, data, client_address):
-    global count_img
-    count_img += 1
-    if count_img > 300:
-        sys.exit()
-    txt = "OSCMessage '%s' from %s: " % (addr, client_address)
-    vtime = datetime.datetime.now()
-    stime = vtime.strftime("%H:%M:%S.%f") 
-    txt += stime
-    txt += str(data)
-    imgdf.ix[stime] = data;
+    #global count_img
+    #count_img += 1
+    #if count_img > 300:
+    #    sys.exit()
+    #txt = "OSCMessage '%s' from %s: " % (addr, client_address)
+    #vtime = datetime.datetime.now()
+    #stime = vtime.strftime("%H:%M:%S.%f") 
+    #txt += stime
+    #txt += str(data)
+    #imgdf.ix[stime] = data;
     #print(txt)
-
+    return
 def plot_img():
     global count_img
     tls.set_credentials_file(username="fairymane", api_key="x4kt8y1smu")
@@ -586,7 +586,7 @@ def offline_plot(pickle_file):
 
 def get_stream():
     s = OSC.OSCServer(('127.0.0.1', 8888))  # listen on localhost, port 57120
-    #s.addMsgHandler('/myo/IMG', IMGHandler) 
+    s.addMsgHandler('/myo/IMG', IMGHandler) 
     s.addMsgHandler('/myo/emg', EMGHandler)     # call handler() for OSC messages received with the /startup address
     s.addMsgHandler('/myo/pose', handler)     # call handler() for OSC messages received with the /startup address
 
