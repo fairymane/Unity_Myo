@@ -7,7 +7,8 @@ import sys
 import threading
 import random
 import Queue
-from sklearn import preprocessing, svm, tree, neural_network
+from sklearn import preprocessing, svm, tree
+from sknn.mlp import Classifier, Layer
 #from sklearn.neural_network import MLPClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.decomposition import PCA
@@ -122,9 +123,7 @@ def get_sample_label(df):
         df: DataFrame
     return: [data_samples, label]
     """
-    #print 'df_train : ', df_train ,'\n df_test', df_test
     samples = df
-
     samples = samples.dropna()
     label = samples['label_index']
     samples = samples.drop('label_index', axis=1)
@@ -132,16 +131,10 @@ def get_sample_label(df):
     if 'label' in samples.columns:
         samples = samples.drop('label', axis=1)
 
-    #print 'samples:&&&&&&: ', samples
-
-    #print 'get_sample_label --------- label: ', label    
-    #if scale:    
-        #samples= preprocessing.scale(samples)
-
     return [samples, label]
 
 
-def testing_accuracy(test_data, test_label, pca_train, model_train, get_accuracy = False, activity = False):
+def testing_accuracy(test_data, test_label, pca_train, model_train, extract_test_res = False, get_accuracy = False, activity = False):
     """
     testing_accuracy: test the accuracy given the test_data corresponding to the trained pca, svm model
     Parameters:
@@ -156,9 +149,12 @@ def testing_accuracy(test_data, test_label, pca_train, model_train, get_accuracy
     df_test_pca =  pca_train.transform(test_data)
 
     test_res = model_train.predict(df_test_pca)
-
     n_test_sample = len(test_res)
-    #print 'test_label type: ', test_label
+    if extract_test_res:
+        tmp = []
+        for i in range(n_test_sample):
+            tmp.append(int(test_res[i][0]) )
+        test_res = tmp
     if activity:
         n_error = np.count_nonzero( test_res - test_label )
     else: 
@@ -208,13 +204,20 @@ def training_decision_tree(df):
     tree_train = tree.DecisionTreeClassifier().fit(df_train_pca, train_label )
     return [pca_, tree_train]
 
-def training_NN(df, alpha_val = 1e-5, hidden_layer = (20,5)):
+def training_NN(df, alpha_val, hidden_layer ):
     [df_train, train_label] = get_sample_label(df)
     num_component = int(math.ceil(df_train.shape[1] * 0.4))
     pca_ = PCA(n_components= num_component)
     pca_.fit(df_train)
     df_train_pca =  pca_.transform(df_train)
-    nn_train = MLPClassifier(algorithm='l-bfgs', alpha = alpha_val, hidden_layer_sizes = hidden_layer, random_state=1)
+    #nn_train = Classifier(layers=[Layer("Maxout", units=80), Layer("Softmax")], learning_rate = alpha_val, n_iter=80).fit(df_train_pca, train_label)
+    nn_train = Classifier(
+    layers=[
+        Layer("Maxout", units= hidden_layer[0] ),
+        Layer("Softmax")],
+    learning_rate=alpha_val,
+    n_iter=25).fit(df_train_pca, train_label)
+    #nn_train = neural_network.MLPClassifier(algorithm='l-bfgs', alpha = alpha_val, hidden_layer_sizes = hidden_layer, random_state=1).fit(df_train_pca, train_label)
     return [pca_, nn_train]
 
 
@@ -284,7 +287,7 @@ def run_decision_tree(hdf_file, label_index):
     [pca_, model_] = training_decision_tree(df_train)
     testing_accuracy(test_data, test_label, pca_, model_, get_accuracy = True)
 
-def run_neural_network(hdf_file, label_index, alpha_val, hidden_layer):
+def run_NN(hdf_file, label_index, alpha_val, hidden_layer):
     print 'training neural network'
     [df_train, df_test] = shuffle_data(hdf_file, label_index)
     [train_data, train_label] = get_sample_label(df_train)
@@ -292,7 +295,7 @@ def run_neural_network(hdf_file, label_index, alpha_val, hidden_layer):
     [test_data, test_label] = get_sample_label(df_test)
     print 'test_data shape: ', test_data.shape
     [pca_, model_] = training_NN(df_train, alpha_val, hidden_layer)
-    testing_accuracy(test_data, test_label, pca_, model_, get_accuracy = True)
+    testing_accuracy(test_data, test_label, pca_, model_, extract_test_res = True, get_accuracy = True)
 
 
 if __name__ == "__main__":
@@ -308,10 +311,10 @@ if __name__ == "__main__":
 
     ## shuffle data and seperate to 
     #run_random_forest(hdf_file_, label_index_)
-    run_hmm(hdf_file_, label_index_)
+    #run_hmm(hdf_file_, label_index_)
     #run_svm(hdf_file_, label_index_)
     #run_decision_tree(hdf_file_, label_index_)
-    #run_neural_network(hdf_file_, label_index_, alpha_val = 1e-5, hidden_layer = (20, 5) )
+    run_NN(hdf_file_, label_index_, alpha_val = 1e-3, hidden_layer = (60, 5) )
     
 
 
