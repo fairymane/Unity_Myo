@@ -8,12 +8,14 @@ import threading
 import random
 import Queue
 from sklearn import preprocessing, svm, tree, neural_network
-from sklearn.neural_network import MLPClassifier
+#from sklearn.neural_network import MLPClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.decomposition import PCA
+from hmmlearn import hmm
 import math
 import pickle
 import os
+
 
 
 
@@ -225,6 +227,23 @@ def training_random_forest(df, pca_comp = 0.4):
     rf_train = RandomForestClassifier(n_estimators=100).fit(df_train_pca, train_label )
     return [pca_, rf_train]
 
+def training_hmm(df, pca_comp = 0.6):
+    [df_train, train_label] = get_sample_label(df)
+    num_component = int(math.ceil(df_train.shape[1] * pca_comp))
+    pca_ = PCA(n_components= num_component)
+    pca_.fit(df_train)
+    df_train_pca =  pca_.transform(df_train)
+    remodel = hmm.GaussianHMM(n_components=6, n_iter=200).fit(df_train_pca)
+    print 'remodel.monitor_ :', remodel.monitor_ 
+    print 'remodel.monitor_.converged :', remodel.monitor_.converged
+    print 'initial prob :, ', remodel.startprob_
+    print 'transition matrix: ', remodel.transmat_
+
+
+
+    return [pca_, remodel]
+
+
 def run_random_forest(hdf_file, label_index):
     print 'training random forest'
     [df_train, df_test] = shuffle_data(hdf_file, label_index)
@@ -235,6 +254,18 @@ def run_random_forest(hdf_file, label_index):
     print 'test_data shape: ', test_data.shape
     [pca_, model_] = training_random_forest(df_train)
     testing_accuracy(test_data, test_label, pca_, model_, get_accuracy = True)
+
+def run_hmm(hdf_file, label_index):
+    print 'training random forest'
+    [df_train, df_test] = shuffle_data(hdf_file, label_index)
+    [train_data, train_label] = get_sample_label(df_train)
+
+    print 'train_data shape: ', train_data.shape
+    [test_data, test_label] = get_sample_label(df_test)
+    print 'test_data shape: ', test_data.shape
+    [pca_, model_] = training_hmm(df_train)
+    testing_accuracy(test_data, test_label, pca_, model_, get_accuracy = True)
+
 
 def run_svm(hdf_file, label_index):
     print 'training svm'
@@ -279,7 +310,8 @@ if __name__ == "__main__":
 
 
     ## shuffle data and seperate to 
-    run_random_forest(hdf_file_, label_index_)
+    #run_random_forest(hdf_file_, label_index_)
+    run_hmm(hdf_file_, label_index_)
     #run_svm(hdf_file_, label_index_)
     #run_decision_tree(hdf_file_, label_index_)
     #run_neural_network(hdf_file_, label_index_, alpha_val = 1e-5, hidden_layer = (20, 5) )
