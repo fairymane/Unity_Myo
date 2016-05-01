@@ -306,15 +306,24 @@ if __name__ == "__main__":
     label_index_ = {'emg_index_test': 1, 'emg_middle_test':2, 'emg_ring_text' :3, 'emg_little_test': 4, 'emg_spread_test':5, 'emg_idle_test':6}  # label_index
     hdf_file_ = '../data/gesture.h5'
 
-    #file  = sys.argv[1] 
-    #df = pickle.load(open(file, "rb"))
-    #ws = 1
-    #generate_window_feature(hdf_file_, ws)
+    print 'sys.argv: ', sys.argv
+    if len(sys.argv) > 1:
+        if sys.argv[1] == '1':
+            ws = 1
+            generate_window_feature(hdf_file_, ws)
+
+        clf_name = sys.argv[2]
+        if clf_name == 'rf':
+            run_random_forest(hdf_file_, label_index_)
+
+
+    
+    
 
 
     ## shuffle data and seperate to 
     #run_random_forest(hdf_file_, label_index_)
-    run_random_forest(hdf_file_, label_index_)
+    
     #run_hmm(hdf_file_, label_index_)
     #run_svm(hdf_file_, label_index_)
     #run_decision_tree(hdf_file_, label_index_)
