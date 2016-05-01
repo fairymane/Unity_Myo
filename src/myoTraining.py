@@ -228,6 +228,7 @@ def training_random_forest(df, pca_comp = 0.4):
     pca_.fit(df_train)
     df_train_pca =  pca_.transform(df_train) 
     rf_train = RandomForestClassifier(n_estimators=100).fit(df_train_pca, train_label )
+
     return [pca_, rf_train]
 
 def training_hmm(df, pca_comp = 0.6):
@@ -253,6 +254,8 @@ def run_random_forest(hdf_file, label_index):
     [test_data, test_label] = get_sample_label(df_test)
     print 'test_data shape: ', test_data.shape
     [pca_, model_] = training_random_forest(df_train)
+    with open('../data/random_forest.p', 'wb') as f:
+        pickle.dump([pca_, model_], f)
     testing_accuracy(test_data, test_label, pca_, model_, get_accuracy = True)
 
 def run_hmm(hdf_file, label_index):
@@ -310,15 +313,12 @@ if __name__ == "__main__":
 
 
     ## shuffle data and seperate to 
-<<<<<<< HEAD
     #run_random_forest(hdf_file_, label_index_)
-=======
     run_random_forest(hdf_file_, label_index_)
->>>>>>> 0a6842fc422c6339f78ed9d027331b4ed48422c3
     #run_hmm(hdf_file_, label_index_)
     #run_svm(hdf_file_, label_index_)
     #run_decision_tree(hdf_file_, label_index_)
-    run_NN(hdf_file_, label_index_, alpha_val = 1e-3, hidden_layer = (60, 5) )
+    #run_NN(hdf_file_, label_index_, alpha_val = 1e-3, hidden_layer = (60, 5) )
     
 
 
