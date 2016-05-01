@@ -1,12 +1,12 @@
 #!/usr/bin/python
 import pandas as pd
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import numpy as np
 import time
+import datetime 
 import sys
 import threading
 import random
-import Queue
 from sklearn import preprocessing, svm, tree
 from sknn.mlp import Classifier, Layer
 #from sklearn.neural_network import MLPClassifier
@@ -15,10 +15,19 @@ from sklearn.decomposition import PCA
 from hmmlearn import hmm
 import math
 import pickle
+import OSC
 import os
 
 
-
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 def count_mean_crossing(df):
     """
@@ -36,45 +45,7 @@ def count_mean_crossing(df):
         res[i] = np.count_nonzero(np.diff(np.sign(col))) 
         
     return res
-   
-def generate_window_feature(hdf_file, ws, ss = None, fs = 200, pattern_name = 'NA'):
-    hdf = pd.HDFStore('../data/gesture.h5')
-    hdf_keys = hdf.keys() 
-    stat_feature = ['_mean', '_median', '_var', '_meanCrossCount']
-    if ss is None:
-        # ss was not provided. the windows will not overlap in any direction.
-        ss = ws * 0.25
-    ss = int(ss * fs)
-    ws = int(ws * fs)
-
-    print 'hdf_keys: ', hdf_keys
-    for key in hdf_keys:
-        if 'raw_' in key:
-            #key = key.strip('/ ')
-            df = hdf[key]    
-            df_header = df.columns
-            header = []
-            for elm in stat_feature:
-                for df_elm in df_header:
-                    header.append(df_elm + elm)
-            feature_df = pd.DataFrame(columns= header)
-            feature_df.loc[0] = 0
-            feature_df_count = 0
-            print '+++++++++++++++++++start sliding windows+++++++++++++++++'
-            df_len = df.shape[0]
-            start = 0
-            end = ws
-            while end < df_len:
-                #print 'feature_df.ix[feature_df_count]: ', feature_df.ix[feature_df_count]
-                feature_df.ix[feature_df_count] = np.concatenate((df.ix[start:end].mean(0), df.ix[start:end].median(0), df.ix[start:end].var(0),  count_mean_crossing(df.ix[start:end]) ))
-                feature_df_count +=1
-
-                start += ss
-                end += ss
-            feature_df = feature_df.convert_objects()    
-            hdf.put(key[5:], feature_df, format='table', data_columns=True)
-    hdf.close()        
-
+          
 def shuffle_data(hdf_file, label_index):
     """
     shuffle_data: combine and shuffle (randomnize by rows) DataFrame(s) to generate traing and testing samples
@@ -147,7 +118,7 @@ def testing_accuracy(test_data, test_label, pca_train, model_train, extract_test
     """
     #print test_data
     df_test_pca =  pca_train.transform(test_data)
-    #print 'df_test_pca.shape: ', df_test_pca.shape
+
     test_res = model_train.predict(df_test_pca)
     n_test_sample = len(test_res)
     if extract_test_res:
@@ -170,55 +141,6 @@ def testing_accuracy(test_data, test_label, pca_train, model_train, extract_test
         print 'test_res VS test_label\n', test_res, '\n', test_label.values
 
     return test_res
-
-def training_svm(df, kernel_ = 'rbf', C = 1.0, h = .02 ):
-    """
-    training_svm training an SVM (kernel = rbf by defult)
-    parameter: 
-        df: DataFrame
-        kernel_ : kernel function, 'rbf' by default
-        C:  SVM regularization parameter
-        h: step size in the mesh
-    Return:
-        [PCA_model, SVM_model]
-
-    """
-    [df_train, train_label] = get_sample_label(df)
-    df_train = preprocessing.scale(df_train)
-    num_component = int(math.ceil(df_train.shape[1] * 0.4))
-    pca_ = PCA(n_components= num_component)
-    pca_.fit(df_train)
-    df_train_pca =  pca_.transform(df_train)
-         
-    ### we create an instance of SVM and fit out data. We do not scale our
-    ### data since we want to plot the support vectors
-    svm_train = svm.SVC(kernel= kernel_, gamma=0.7, C=C).fit(df_train_pca, train_label )
-    return [pca_, svm_train]
-
-def training_decision_tree(df):
-    [df_train, train_label] = get_sample_label(df)
-    num_component = int(math.ceil(df_train.shape[1] * 0.4))
-    pca_ = PCA(n_components= num_component)
-    pca_.fit(df_train)
-    df_train_pca =  pca_.transform(df_train)
-    tree_train = tree.DecisionTreeClassifier().fit(df_train_pca, train_label )
-    return [pca_, tree_train]
-
-def training_NN(df, alpha_val, hidden_layer ):
-    [df_train, train_label] = get_sample_label(df)
-    num_component = int(math.ceil(df_train.shape[1] * 0.4))
-    pca_ = PCA(n_components= num_component)
-    pca_.fit(df_train)
-    df_train_pca =  pca_.transform(df_train)
-    #nn_train = Classifier(layers=[Layer("Maxout", units=80), Layer("Softmax")], learning_rate = alpha_val, n_iter=80).fit(df_train_pca, train_label)
-    nn_train = Classifier(
-    layers=[
-        Layer("Maxout", units= hidden_layer[0] ),
-        Layer("Softmax")],
-    learning_rate=alpha_val,
-    n_iter=25).fit(df_train_pca, train_label)
-    #nn_train = neural_network.MLPClassifier(algorithm='l-bfgs', alpha = alpha_val, hidden_layer_sizes = hidden_layer, random_state=1).fit(df_train_pca, train_label)
-    return [pca_, nn_train]
 
 
 def training_random_forest(df, pca_comp = 0.4):
@@ -270,55 +192,126 @@ def run_hmm(hdf_file, label_index):
     testing_accuracy(test_data, test_label, pca_, model_, get_accuracy = True)
 
 
-def run_svm(hdf_file, label_index):
-    print 'training svm'
-    [df_train, df_test] = shuffle_data(hdf_file, label_index)
-    [train_data, train_label] = get_sample_label(df_train)
-    print 'train_data shape: ', train_data.shape
-    [test_data, test_label] = get_sample_label(df_test)
-    print 'test_data shape: ', test_data.shape
-    [pca_, model_] = training_svm(df_train)
-    testing_accuracy(test_data, test_label, pca_, model_, get_accuracy = True)
 
-def run_decision_tree(hdf_file, label_index):
-    print 'training decision tree'
-    [df_train, df_test] = shuffle_data(hdf_file, label_index)
-    [train_data, train_label] = get_sample_label(df_train)
-    print 'train_data shape: ', train_data.shape
-    [test_data, test_label] = get_sample_label(df_test)
-    print 'test_data shape: ', test_data.shape
-    [pca_, model_] = training_decision_tree(df_train)
-    testing_accuracy(test_data, test_label, pca_, model_, get_accuracy = True)
+def generate_window_feature(hdf_file, ws, ss = None, fs = 200, pattern_name = 'NA'):
+    hdf = pd.HDFStore('../data/gesture.h5')
+    hdf_keys = hdf.keys() 
+    stat_feature = ['_mean', '_median', '_var', '_meanCrossCount']
+    if ss is None:
+        # ss was not provided. the windows will not overlap in any direction.
+        ss = ws * 0.25
+    ss = int(ss * fs)
+    ws = int(ws * fs)
 
-def run_NN(hdf_file, label_index, alpha_val, hidden_layer):
-    print 'training neural network'
-    [df_train, df_test] = shuffle_data(hdf_file, label_index)
-    [train_data, train_label] = get_sample_label(df_train)
-    print 'train_data shape: ', train_data.shape
-    [test_data, test_label] = get_sample_label(df_test)
-    print 'test_data shape: ', test_data.shape
-    [pca_, model_] = training_NN(df_train, alpha_val, hidden_layer)
-    testing_accuracy(test_data, test_label, pca_, model_, extract_test_res = True, get_accuracy = True)
+    print 'hdf_keys: ', hdf_keys
+    for key in hdf_keys:
+        if 'raw_' in key:
+            #key = key.strip('/ ')
+            df = hdf[key]    
+            df_header = df.columns
+            header = []
+            for elm in stat_feature:
+                for df_elm in df_header:
+                    header.append(df_elm + elm)
+            feature_df = pd.DataFrame(columns= header)
+            feature_df.loc[0] = 0
+            feature_df_count = 0
+            print '+++++++++++++++++++start sliding windows+++++++++++++++++'
+            df_len = df.shape[0]
+            start = 0
+            end = ws
+            while end < df_len:
+                #print 'feature_df.ix[feature_df_count]: ', feature_df.ix[feature_df_count]
+                feature_df.ix[feature_df_count] = np.concatenate((df.ix[start:end].mean(0), df.ix[start:end].median(0), df.ix[start:end].var(0),  count_mean_crossing(df.ix[start:end]) ))
+                feature_df_count +=1
+
+                start += ss
+                end += ss
+            feature_df = feature_df.convert_objects()    
+            hdf.put(key[5:], feature_df, format='table', data_columns=True)
+    hdf.close() 
+
+def handler_realtime(addr, tags, data, client_address):
+    #txt = "OSCMessage '%s' from %s: " % (addr, client_address)
+    #vtime = datetime.datetime.now()
+    #stime = vtime.strftime("%Y-%m-%d %H:%M:%S ") 
+    #stime = vtime.strftime("%H:%M:%S.%f") 
+    #txt += stime
+    #txt += str(data)
+    #print time.time()
+    #print(txt)
+    return
+
+def IMGHandler_realtimg(addr, tags, data, client_address):
+    #global count_img
+    #count_img += 1
+    #if count_img > 300:
+    #    sys.exit()
+    #txt = "OSCMessage '%s' from %s: " % (addr, client_address)
+    #vtime = datetime.datetime.now()
+    #stime = vtime.strftime("%H:%M:%S.%f") 
+    #txt += stime
+    #txt += str(data)
+    #imgdf.ix[stime] = data;
+    #print(txt)
+    return
+
+def EMGHandler_realtime(addr, tags, data, client_address):
+    global step_size
+    global start
+    global end
+    global emgdf
+    global pca_
+    global model_
+    global index_label
+    #txt = "OSCMessage '%s' from %s: " % (addr, client_address)
+    vtime = datetime.datetime.now()
+    stime = vtime.strftime("%H:%M:%S.%f")  
+    #txt += stime
+    #txt += str(data)
+    emgdf.ix[stime] = data
+    if end < emgdf.shape[0]:
+        tmp = np.concatenate((emgdf.ix[start:end].mean(0), emgdf.ix[start:end].median(0), emgdf.ix[start:end].var(0),  count_mean_crossing(emgdf.ix[start:end]) ))
+        tmp_pca =  pca_.transform(tmp)
+        test_res = model_.predict(tmp_pca)
+        res = int(test_res[0] )
+        print 'res:', res
+        print bcolors.OKGREEN + 'predict: ' + index_label[res] + bcolors.ENDC
+        start += step_size
+        end += step_size
+
+
+def get_stream():
+    s = OSC.OSCServer(('127.0.0.1', 8888))  # listen on localhost, port 57120
+    s.addMsgHandler('/myo/IMG', IMGHandler_realtimg) 
+    s.addMsgHandler('/myo/emg', EMGHandler_realtime)     # call handler() for OSC messages received with the /startup address
+    s.addMsgHandler('/myo/pose', handler_realtime)     # call handler() for OSC messages received with the /startup address
+    s.serve_forever()
 
 
 if __name__ == "__main__":
+    label_index = {'emg_index_test': 1, 'emg_middle_test':2, 'emg_ring_text' :3, 'emg_little_test': 4, 'emg_spread_test':5, 'emg_idle_test':6} 
+    index_label = {1 : 'emg_index_test', 2: 'emg_middle_test', 3: 'emg_ring_text', 4: 'emg_little_test', 5: 'emg_spread_test', 6: 'emg_idle_test'}
+    emg_header = ['em1', 'em2', 'em3', 'em4', 'em5', 'em6', 'em7', 'em8']
+    stat_feature = ['_mean', '_median', '_var', '_meanCrossCount']
+    #header = []
+    #for elm in stat_feature:
+    #    for df_elm in emg_header:
+    #        header.append(df_elm + elm)
+    #feature_df = pd.DataFrame(columns= header)
 
-    label_index_ = {'emg_index_test': 1, 'emg_middle_test':2, 'emg_ring_text' :3, 'emg_little_test': 4, 'emg_spread_test':5, 'emg_idle_test':6}  # label_index
-    hdf_file_ = '../data/gesture.h5'
+    emgdf = pd.DataFrame(columns= emg_header) 
+    model_file   = sys.argv[1]
+    window_size = 200 
+    step_size = 50
+    start = 0
+    end = window_size
 
-    #file  = sys.argv[1] 
-    #df = pickle.load(open(file, "rb"))
-    #ws = 1
-    #generate_window_feature(hdf_file_, ws)
+    [pca_, model_] = pickle.load( open(model_file, "rb" ) )
+
+    get_stream()
 
 
-    ## shuffle data and seperate to 
-    #run_random_forest(hdf_file_, label_index_)
-    run_random_forest(hdf_file_, label_index_)
-    #run_hmm(hdf_file_, label_index_)
-    #run_svm(hdf_file_, label_index_)
-    #run_decision_tree(hdf_file_, label_index_)
-    #run_NN(hdf_file_, label_index_, alpha_val = 1e-3, hidden_layer = (60, 5) )
     
 
 
