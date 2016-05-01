@@ -307,8 +307,8 @@ if __name__ == "__main__":
 
 
     ## shuffle data and seperate to 
-    #run_random_forest(hdf_file_, label_index_)
-    run_hmm(hdf_file_, label_index_)
+    run_random_forest(hdf_file_, label_index_)
+    #run_hmm(hdf_file_, label_index_)
     #run_svm(hdf_file_, label_index_)
     #run_decision_tree(hdf_file_, label_index_)
     #run_neural_network(hdf_file_, label_index_, alpha_val = 1e-5, hidden_layer = (20, 5) )
