@@ -310,7 +310,11 @@ if __name__ == "__main__":
 
 
     ## shuffle data and seperate to 
+<<<<<<< HEAD
     #run_random_forest(hdf_file_, label_index_)
+=======
+    run_random_forest(hdf_file_, label_index_)
+>>>>>>> 0a6842fc422c6339f78ed9d027331b4ed48422c3
     #run_hmm(hdf_file_, label_index_)
     #run_svm(hdf_file_, label_index_)
     #run_decision_tree(hdf_file_, label_index_)
