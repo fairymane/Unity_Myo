@@ -240,7 +240,7 @@ def run_random_forest(hdf_file, label_index):
 
 if __name__ == "__main__":
 
-    label_index_ = {'emg_index_test': 1, 'emg_middle_test':2}  # label_index
+    label_index_ = {'emg_index_test': 1, 'emg_middle_test':2, 'emg_ring_text' :3, 'emg_little_test': 4, 'emg_spread_test':5, 'emg_idle_test':6}  # label_index
     hdf_file_ = '../data/gesture.h5'
 
     #file  = sys.argv[1] 
