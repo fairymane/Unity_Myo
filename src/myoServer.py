@@ -34,8 +34,8 @@ def EMGHandler(addr, tags, data, client_address):
     global sampleLen 
     count_emg += 1
 
-    # if count_emg  > sampleLen * sys.argv[2] :
-    #     sys.exit()
+    if window  > int(sys.argv[2]) :
+        sys.exit()
 
     txt = "OSCMessage '%s' from %s: " % (addr, client_address)
     vtime = datetime.datetime.now()
