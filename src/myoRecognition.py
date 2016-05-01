@@ -7,7 +7,8 @@ import sys
 import threading
 import random
 import Queue
-from sklearn import preprocessing, svm, tree
+from sklearn import preprocessing, svm, tree, neural_network
+from sklearn.neural_network import MLPClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.decomposition import PCA
 import math
@@ -69,7 +70,6 @@ def generate_window_feature(hdf_file, ws, ss = None, fs = 200, pattern_name = 'N
                 end += ss
             feature_df = feature_df.convert_objects()    
             hdf.put(key[5:], feature_df, format='table', data_columns=True)
-            #print 'pattern_name: ', pattern_name
     hdf.close()        
 
 def shuffle_data(hdf_file, label_index):
@@ -173,6 +173,48 @@ def testing_accuracy(test_data, test_label, pca_train, model_train, get_accuracy
 
     return test_res
 
+def training_svm(df, kernel_ = 'rbf', C = 1.0, h = .02 ):
+    """
+    training_svm training an SVM (kernel = rbf by defult)
+    parameter: 
+        df: DataFrame
+        kernel_ : kernel function, 'rbf' by default
+        C:  SVM regularization parameter
+        h: step size in the mesh
+    Return:
+        [PCA_model, SVM_model]
+
+    """
+    [df_train, train_label] = get_sample_label(df)
+    df_train = preprocessing.scale(df_train)
+    num_component = int(math.ceil(df_train.shape[1] * 0.4))
+    pca_ = PCA(n_components= num_component)
+    pca_.fit(df_train)
+    df_train_pca =  pca_.transform(df_train)
+         
+    ### we create an instance of SVM and fit out data. We do not scale our
+    ### data since we want to plot the support vectors
+    svm_train = svm.SVC(kernel= kernel_, gamma=0.7, C=C).fit(df_train_pca, train_label )
+    return [pca_, svm_train]
+
+def training_decision_tree(df):
+    [df_train, train_label] = get_sample_label(df)
+    num_component = int(math.ceil(df_train.shape[1] * 0.4))
+    pca_ = PCA(n_components= num_component)
+    pca_.fit(df_train)
+    df_train_pca =  pca_.transform(df_train)
+    tree_train = tree.DecisionTreeClassifier().fit(df_train_pca, train_label )
+    return [pca_, tree_train]
+
+def training_NN(df, alpha_val = 1e-5, hidden_layer = (20,5)):
+    [df_train, train_label] = get_sample_label(df)
+    num_component = int(math.ceil(df_train.shape[1] * 0.4))
+    pca_ = PCA(n_components= num_component)
+    pca_.fit(df_train)
+    df_train_pca =  pca_.transform(df_train)
+    nn_train = MLPClassifier(algorithm='l-bfgs', alpha = alpha_val, hidden_layer_sizes = hidden_layer, random_state=1)
+    return [pca_, nn_train]
+
 
 def training_random_forest(df, pca_comp = 0.4):
     [df_train, train_label] = get_sample_label(df)
@@ -184,15 +226,44 @@ def training_random_forest(df, pca_comp = 0.4):
     return [pca_, rf_train]
 
 def run_random_forest(hdf_file, label_index):
+    print 'training random forest'
     [df_train, df_test] = shuffle_data(hdf_file, label_index)
     [train_data, train_label] = get_sample_label(df_train)
 
     print 'train_data shape: ', train_data.shape
     [test_data, test_label] = get_sample_label(df_test)
     print 'test_data shape: ', test_data.shape
-
     [pca_, model_] = training_random_forest(df_train)
+    testing_accuracy(test_data, test_label, pca_, model_, get_accuracy = True)
 
+def run_svm(hdf_file, label_index):
+    print 'training svm'
+    [df_train, df_test] = shuffle_data(hdf_file, label_index)
+    [train_data, train_label] = get_sample_label(df_train)
+    print 'train_data shape: ', train_data.shape
+    [test_data, test_label] = get_sample_label(df_test)
+    print 'test_data shape: ', test_data.shape
+    [pca_, model_] = training_svm(df_train)
+    testing_accuracy(test_data, test_label, pca_, model_, get_accuracy = True)
+
+def run_decision_tree(hdf_file, label_index):
+    print 'training decision tree'
+    [df_train, df_test] = shuffle_data(hdf_file, label_index)
+    [train_data, train_label] = get_sample_label(df_train)
+    print 'train_data shape: ', train_data.shape
+    [test_data, test_label] = get_sample_label(df_test)
+    print 'test_data shape: ', test_data.shape
+    [pca_, model_] = training_decision_tree(df_train)
+    testing_accuracy(test_data, test_label, pca_, model_, get_accuracy = True)
+
+def run_neural_network(hdf_file, label_index, alpha_val, hidden_layer):
+    print 'training neural network'
+    [df_train, df_test] = shuffle_data(hdf_file, label_index)
+    [train_data, train_label] = get_sample_label(df_train)
+    print 'train_data shape: ', train_data.shape
+    [test_data, test_label] = get_sample_label(df_test)
+    print 'test_data shape: ', test_data.shape
+    [pca_, model_] = training_NN(df_train, alpha_val, hidden_layer)
     testing_accuracy(test_data, test_label, pca_, model_, get_accuracy = True)
 
 
@@ -203,12 +274,15 @@ if __name__ == "__main__":
 
     #file  = sys.argv[1] 
     #df = pickle.load(open(file, "rb"))
-    ws = 1
-    generate_window_feature(hdf_file_, ws)
+    #ws = 1
+    #generate_window_feature(hdf_file_, ws)
 
 
     ## shuffle data and seperate to 
     run_random_forest(hdf_file_, label_index_)
+    #run_svm(hdf_file_, label_index_)
+    #run_decision_tree(hdf_file_, label_index_)
+    #run_neural_network(hdf_file_, label_index_, alpha_val = 1e-5, hidden_layer = (20, 5) )
     
 
 
