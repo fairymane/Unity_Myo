@@ -388,6 +388,7 @@ def handler(addr, tags, data, client_address):
 
 def EMGHandler(addr, tags, data, client_address):
     global count_emg
+    window = 1
     count_emg = count_emg + 1
     #if count_emg  >1000 :
     #    sys.exit()
@@ -400,7 +401,8 @@ def EMGHandler(addr, tags, data, client_address):
     txt += str(data)
     emgdf.ix[stime] = data;
     if count_emg % 200 == 0:
-        print "\n\n\n #################################################################"
+        print "\n\n\n ###########################################window number:  ", window
+        window +=1
     if count_emg == 10000:
         pickle.dump(emgdf, open( sys.argv[1], "wb" ) )
         sys.exit()
