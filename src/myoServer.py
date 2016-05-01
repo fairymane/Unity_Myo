@@ -48,8 +48,10 @@ def EMGHandler(addr, tags, data, client_address):
     if count_emg == 5000:
         #pickle.dump(emgdf, open( sys.argv[1], "wb" ) )
         hdf = pd.HDFStore('../data/gesture.h5')
+        
         emgdf = emgdf.convert_objects()
         hdf.put('raw_' + sys.argv[1], emgdf, format='table', data_columns=True)
+        print 'hdf keys: ', hdf.keys()
         hdf.close()
         sys.exit()
     #print(txt)
