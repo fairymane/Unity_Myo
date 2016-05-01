@@ -18,11 +18,9 @@ import threading
 import pickle
 
 
-
-
 def plot_emg_1(emg_df):
     tls.set_credentials_file(username="fairymane", api_key="x4kt8y1smu")
-    global count_emg
+    #global count_emg
 
     stream_ids = tls.get_credentials_file()['stream_ids']
 
@@ -40,35 +38,35 @@ def plot_emg_1(emg_df):
 
     # Make instance of stream id object 
     #for accelometer
-    stream1 = Stream( token=stream_id1,  maxpoints=20)
+    stream1 = Stream( token=stream_id1,  maxpoints=12)
 
     stream2 = Stream(
         token=stream_id2,  # (!) link stream id to 'token' key
-        maxpoints=40      # (!) keep a max of 80 pts on screen 
+        maxpoints=12      # (!) keep a max of 80 pts on screen 
     )
     stream3 = Stream(
         token=stream_id3,  # (!) link stream id to 'token' key
-        maxpoints=40      # (!) keep a max of 80 pts on screen
+        maxpoints=12      # (!) keep a max of 80 pts on screen
     )
     stream4 = Stream(
         token=stream_id4,  # (!) link stream id to 'token' key
-        maxpoints=40      # (!) keep a max of 80 pts on screen
+        maxpoints=12      # (!) keep a max of 80 pts on screen
     )
     stream5 = Stream(
         token=stream_id5,  # (!) link stream id to 'token' key
-        maxpoints=40      # (!) keep a max of 80 pts on screen
+        maxpoints=12      # (!) keep a max of 80 pts on screen
     )
     stream6 = Stream(
         token=stream_id6,  # (!) link stream id to 'token' key
-        maxpoints=40      # (!) keep a max of 80 pts on screen
+        maxpoints=12      # (!) keep a max of 80 pts on screen
     )
     stream7 = Stream(
         token=stream_id7,  # (!) link stream id to 'token' key
-        maxpoints=40      # (!) keep a max of 80 pts on screen
+        maxpoints=12      # (!) keep a max of 80 pts on screen
     )
     stream8 = Stream(
         token=stream_id8,  # (!) link stream id to 'token' key
-        maxpoints=40      # (!) keep a max of 80 pts on screen
+        maxpoints=12      # (!) keep a max of 80 pts on screen
     )
     trace1 = Scatter(
         x=[],
@@ -401,7 +399,9 @@ def EMGHandler(addr, tags, data, client_address):
     txt += stime
     txt += str(data)
     emgdf.ix[stime] = data;
-    if(count_emg == 3000):
+    if count_emg % 200 == 0:
+        print "\n\n\n #################################################################"
+    if count_emg == 10000:
         pickle.dump(emgdf, open( sys.argv[1], "wb" ) )
         sys.exit()
     #print(txt)
@@ -597,7 +597,7 @@ if __name__ == "__main__":
     count_emg = 0
     count_img = 0
     img_header = ['accel_x', 'accel_y', 'accel_z', 'gyro_x', 'gyro_y', 'gyro_z', 'roll', 'pitch', 'yaw', 'quat_x', 'quat_y', 'quat_z', 'quat_w' ] 
-    emg_header = ['em1', 'em2', 'em3', 'em4', 'em15', 'em6', 'em7', 'em8'] 
+    emg_header = ['em1', 'em2', 'em3', 'em4', 'em5', 'em6', 'em7', 'em8'] 
     emgdf = pd.DataFrame(columns= emg_header)
     imgdf = pd.DataFrame(columns= img_header )
     #global count_img
@@ -606,4 +606,6 @@ if __name__ == "__main__":
 
     #t_img = threading.Thread(name='ploting_img', target= plot_img)
     #t_img.start()
-    offline_plot(sys.argv[1])
+    print sys.argv[1]
+    #offline_plot(sys.argv[1])
+    get_stream()
