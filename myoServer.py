@@ -388,7 +388,7 @@ def handler(addr, tags, data, client_address):
 
 def EMGHandler(addr, tags, data, client_address):
     global count_emg
-    window = 1
+    global window 
     count_emg = count_emg + 1
     #if count_emg  >1000 :
     #    sys.exit()
@@ -596,8 +596,7 @@ def get_stream():
 if __name__ == "__main__":
     count_emg = 0
     count_img = 0
-    count_emg = 0
-    count_img = 0
+    window = 1
     img_header = ['accel_x', 'accel_y', 'accel_z', 'gyro_x', 'gyro_y', 'gyro_z', 'roll', 'pitch', 'yaw', 'quat_x', 'quat_y', 'quat_z', 'quat_w' ] 
     emg_header = ['em1', 'em2', 'em3', 'em4', 'em5', 'em6', 'em7', 'em8'] 
     emgdf = pd.DataFrame(columns= emg_header)
