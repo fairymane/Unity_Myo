@@ -238,9 +238,6 @@ def training_hmm(df, pca_comp = 0.6):
     print 'remodel.monitor_.converged :', remodel.monitor_.converged
     print 'initial prob :, ', remodel.startprob_
     print 'transition matrix: ', remodel.transmat_
-
-
-
     return [pca_, remodel]
 
 
