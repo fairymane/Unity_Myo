@@ -32,49 +32,7 @@ def count_mean_crossing(df):
         res[i] = np.count_nonzero(np.diff(np.sign(col))) 
         
     return res
-
-
-def shuffle_data2(hdf_file, label_index):
-    """
-    shuffle_data: combine and shuffle (randomnize by rows) DataFrame(s) to generate traing and testing samples
-    Parameters:
-        hdf_file: hdf file which stores the DataFrame(s)
-        label_index: label_index contains the class label(s) and label_index index (e.g. {shooting1: 1, walking1:2 }) 
-                    for unit_patterns: e.g. walking, jumping, 
-    Return:
-        train_data_set and test_data_set extracted from shuffle_data() function  
-    """
-    store = pd.HDFStore(hdf_file)
-
-    df_init = False
-
-    for key, val in label_index.items() :
-        try:
-            tmp_df = store[key]
-            tmp_df['label_index'] = val
-            if not df_init:
-                df_train = pd.DataFrame(columns = tmp_df.columns) 
-                df_test = pd.DataFrame(columns = tmp_df.columns)
-                df_init = True
-
-            test_sample = int(tmp_df.shape[0] * 0.25)
-            rows = random.sample(tmp_df.index, test_sample )
-            df_test = df_test.append(tmp_df.ix[rows])
-            df_train = df_train.append(tmp_df.drop(rows))
-
-        except StandardError, e:
-            print 'The DataFrame corresponding to ", key, " may not exists: \n', e
-
-    train_rows =  random.sample(df_train.index, df_train.shape[0] )
-    df_train = df_train.ix[train_rows]
-
-    test_rows =  random.sample(df_test.index, df_test.shape[0] )
-    df_test = df_test.ix[test_rows]
-    store.close()
-
-    return [df_train, df_test]
-
-    
+   
 def generate_window_feature(hdf_file, ws, ss = None, fs = 200, pattern_name = 'NA'):
     hdf = pd.HDFStore('../data/gesture.h5')
     hdf_keys = hdf.keys() 
