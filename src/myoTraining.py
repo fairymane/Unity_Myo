@@ -18,8 +18,6 @@ import pickle
 import os
 
 
-
-
 def count_mean_crossing(df):
     """
     count_mean_crossing: count number of mean crossing on each dimension of ndarrary or DataFrame
@@ -34,7 +32,6 @@ def count_mean_crossing(df):
     for i in xrange(d) :
         col = df.ix[:, i].values
         res[i] = np.count_nonzero(np.diff(np.sign(col))) 
-        
     return res
    
 def generate_window_feature(hdf_file, ws, ss = None, fs = 200, pattern_name = 'NA'):
@@ -303,25 +300,30 @@ def run_NN(hdf_file, label_index, alpha_val, hidden_layer):
 
 if __name__ == "__main__":
 
-    label_index_ = {'emg_index_test': 1, 'emg_middle_test':2, 'emg_ring_text' :3, 'emg_little_test': 4, 'emg_spread_test':5, 'emg_idle_test':6}  # label_index
+    label_index_ = {'emg_index_test': 1, 'emg_middle_test':2, 'emg_ring_test' :3, 'emg_little_test': 4, 'emg_spread_test':5, 'emg_idle_test':6}  # label_index
     hdf_file_ = '../data/gesture.h5'
 
-    print 'sys.argv: ', sys.argv
-    if len(sys.argv) > 1:
-        if sys.argv[1] == '1':
-            ws = 1
-            generate_window_feature(hdf_file_, ws)
+    if len(sys.argv) < 3:
+        print 'require 3~5 arguments. e.g.: \n python myoTraining.py 1(1 for generate features from raw data, 0 otherwise) rf(e.g. random forest) ws(training window size of ws second, with 200 freqency, default by 1 if not specified) ss (step size, defult by 0.25 if not specified)'
+        sys.exit()
 
-        clf_name = sys.argv[2]
-        if clf_name == 'rf':
-            run_random_forest(hdf_file_, label_index_)
+    if len(sys.argv)  == 3:
+        ws = 1
+        ss =0.25  
+    elif len(sys.argv)  == 4:
+        ws = float(sys.argv[2])
+        ss = 0.25
+    elif len(sys.argv)  == 5:
+        ws = float(sys.argv[2])
+        mss = float(sys.argv[2])
 
+    if sys.argv[1] == '1':       
+        generate_window_feature(hdf_file_, ws, ss)
 
-    
-    
+    clf_name = sys.argv[2]
+    if clf_name == 'rf':
+        run_random_forest(hdf_file_, label_index_)
 
-
-    ## shuffle data and seperate to 
     #run_random_forest(hdf_file_, label_index_)
     
     #run_hmm(hdf_file_, label_index_)

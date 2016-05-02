@@ -80,18 +80,25 @@ def EMGHandler_realtime(addr, tags, data, client_address):
     global pca_
     global model_
     global index_label
+    global prediction_bin
+    global bin_count
     #txt = "OSCMessage '%s' from %s: " % (addr, client_address)
     vtime = datetime.datetime.now()
     stime = vtime.strftime("%H:%M:%S.%f")  
     #txt += stime
     #txt += str(data)
+    
+
     emgdf.ix[stime] = data
     if end < emgdf.shape[0]:
         tmp = np.concatenate((emgdf.ix[start:end].mean(0), emgdf.ix[start:end].median(0), emgdf.ix[start:end].var(0),  count_mean_crossing(emgdf.ix[start:end]) ))
         tmp_pca =  pca_.transform(tmp)
         test_res = model_.predict(tmp_pca)
-        res = int(test_res[0] )
-        print 'res:', res
+        prediction_bin[bin_count] = int(test_res[0] )
+        bin_count += 1
+        if bin_count>5:
+            bin_count = 0
+        res = np.argmax(np.bincount(prediction_bin))    
         print bcolors.OKGREEN + 'predict: ' + index_label[res] + bcolors.ENDC
         start += step_size
         end += step_size
@@ -106,18 +113,28 @@ def get_stream():
 
 
 if __name__ == "__main__":
-    label_index = {'emg_index_test': 1, 'emg_middle_test':2, 'emg_ring_text' :3, 'emg_little_test': 4, 'emg_spread_test':5, 'emg_idle_test':6} 
-    index_label = {1 : 'emg_index_test', 2: 'emg_middle_test', 3: 'emg_ring_text', 4: 'emg_little_test', 5: 'emg_spread_test', 6: 'emg_idle_test'}
-    emg_header = ['em1', 'em2', 'em3', 'em4', 'em5', 'em6', 'em7', 'em8']
-    stat_feature = ['_mean', '_median', '_var', '_meanCrossCount']
 
-    emgdf = pd.DataFrame(columns= emg_header) 
+    if len(sys.argv) < 2:
+        print 'require 2~4 arguments. e.g.: \n python myoRecogintion.py model_file(pickle) ws(recoginition window size of ws second, with 200 freqency, default by 1 if not specified) ss (step size, defult by 0.25 if not specified)'
+        sys.exit()
     model_file   = sys.argv[1]
-
     window_size = 200 
     step_size = 50
+    if len(sys.argv) > 2:
+        window_size = int(sys.argv[2]) * 200 # frequency is 200
+    if len(sys.argv) > 3:
+        step_size = int(sys.argv[3]) * 200
+
+    label_index = {'emg_index_test': 1, 'emg_middle_test':2, 'emg_ring_text' :3, 'emg_little_test': 4, 'emg_spread_test':5, 'emg_idle_test':6} 
+    index_label = {1 : 'emg_index_test', 2: 'emg_middle_test', 3: 'emg_ring_test', 4: 'emg_little_test', 5: 'emg_spread_test', 6: 'emg_idle_test'}
+    emg_header = ['em1', 'em2', 'em3', 'em4', 'em5', 'em6', 'em7', 'em8']
+    stat_feature = ['_mean', '_median', '_var', '_meanCrossCount']
+    emgdf = pd.DataFrame(columns= emg_header)
+    
     start = 0
     end = window_size
+    prediction_bin = np.array([6, 6, 6, 6, 6, 6])
+    bin_count = 0
     [pca_, model_] = pickle.load( open(model_file, "rb" ) )
 
     get_stream()
