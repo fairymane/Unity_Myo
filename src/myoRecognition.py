@@ -43,10 +43,8 @@ def count_mean_crossing(df):
     for i in xrange(d) :
         col = df.ix[:, i].values
         res[i] = np.count_nonzero(np.diff(np.sign(col))) 
-        
     return res
           
-
 def handler_realtime(addr, tags, data, client_address):
     #txt = "OSCMessage '%s' from %s: " % (addr, client_address)
     #vtime = datetime.datetime.now()
