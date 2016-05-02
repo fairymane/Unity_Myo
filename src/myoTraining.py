@@ -85,8 +85,7 @@ def shuffle_data(hdf_file, label_index):
     store = pd.HDFStore(hdf_file)
 
     df_init = False
-
-    print 'store.keys: ', store.keys()
+    #print 'store.keys: ', store.keys()
     for key, val in label_index.items() :
         try:
             tmp_df = store[key]
@@ -210,10 +209,10 @@ def training_NN(df, alpha_val, hidden_layer ):
     #nn_train = Classifier(layers=[Layer("Maxout", units=80), Layer("Softmax")], learning_rate = alpha_val, n_iter=80).fit(df_train_pca, train_label)
     nn_train = Classifier(
     layers=[
-        Layer("Maxout", units= hidden_layer[0] ),
+        Layer("Sigmoid", units= hidden_layer[0] ),
         Layer("Softmax")],
     learning_rate=alpha_val,
-    n_iter=25).fit(df_train_pca, train_label)
+    n_iter= 70).fit(df_train_pca, train_label)
     #nn_train = neural_network.MLPClassifier(algorithm='l-bfgs', alpha = alpha_val, hidden_layer_sizes = hidden_layer, random_state=1).fit(df_train_pca, train_label)
     return [pca_, nn_train]
 
@@ -288,7 +287,7 @@ def run_decision_tree(hdf_file, label_index):
     testing_accuracy(test_data, test_label, pca_, model_, get_accuracy = True)
 
 def run_NN(hdf_file, label_index, alpha_val, hidden_layer):
-    print 'training neural network'
+    print 'training neural network, learning_rate: ', alpha_val, ' number of hidden_layer: ', hidden_layer[0]
     [df_train, df_test] = shuffle_data(hdf_file, label_index)
     [train_data, train_label] = get_sample_label(df_train)
     print 'train_data shape: ', train_data.shape
@@ -323,6 +322,8 @@ if __name__ == "__main__":
     clf_name = sys.argv[2]
     if clf_name == 'rf':
         run_random_forest(hdf_file_, label_index_)
+    if clf_name == 'nn':
+        run_NN(hdf_file_, label_index_, alpha_val = 1e-4, hidden_layer = (100, 5) )
 
     #run_random_forest(hdf_file_, label_index_)
     
