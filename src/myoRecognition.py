@@ -123,8 +123,12 @@ if __name__ == "__main__":
     if len(sys.argv) > 3:
         step_size = int(sys.argv[3]) * 200
 
-    label_index = {'emg_index_test': 1, 'emg_middle_test':2, 'emg_ring_text' :3, 'emg_little_test': 4, 'emg_spread_test':5, 'emg_idle_test':6} 
-    index_label = {1 : 'emg_index_test', 2: 'emg_middle_test', 3: 'emg_ring_test', 4: 'emg_little_test', 5: 'emg_spread_test', 6: 'emg_idle_test'}
+    label_index_ = {'emg_relax': 0, 'emg_index':1, 'emg_middle':2, 'emg_ring' :3, 'emg_little': 4, 'emg_spread':5, 'emg_wavein':6, 'emg_waveout':7}  
+    index_label = dict()
+    for key, val in label_index:
+        index_label[val] = key 
+
+    #index_label = {1 : 'emg_index_test', 2: 'emg_middle_test', 3: 'emg_ring_test', 4: 'emg_little_test', 5: 'emg_spread_test', 6: 'emg_idle_test'}
     emg_header = ['em1', 'em2', 'em3', 'em4', 'em5', 'em6', 'em7', 'em8']
     stat_feature = ['_mean', '_median', '_var', '_meanCrossCount']
     emgdf = pd.DataFrame(columns= emg_header)
