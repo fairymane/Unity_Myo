@@ -89,7 +89,9 @@ def EMGHandler_realtime(addr, tags, data, client_address):
 
     emgdf.ix[stime] = data
     if end < emgdf.shape[0]:
-        tmp = np.concatenate((emgdf.ix[start:end].mean(0), emgdf.ix[start:end].median(0), emgdf.ix[start:end].var(0),  count_mean_crossing(emgdf.ix[start:end]) ))
+        # tmp = np.concatenate((emgdf.ix[start:end].mean(0), emgdf.ix[start:end].median(0), emgdf.ix[start:end].var(0),  count_mean_crossing(emgdf.ix[start:end]) ))
+        tmp = np.concatenate((emgdf.ix[start:end].mean(0), emgdf.ix[start:end].median(0), emgdf.ix[start:end].var(0) ))
+        tmp = np.array(tmp).reshape(len(tmp),1)
         tmp_pca =  pca_.transform(tmp)
         test_res = model_.predict(tmp_pca)
         prediction_bin[bin_count] = int(test_res[0] )
@@ -119,18 +121,19 @@ if __name__ == "__main__":
     window_size = 200 
     step_size = 50
     if len(sys.argv) > 2:
-        window_size = int(sys.argv[2]) * 200 # frequency is 200
+        window_size = int(float(sys.argv[2]) * 200) # frequency is 200
     if len(sys.argv) > 3:
-        step_size = int(sys.argv[3]) * 200
+        step_size = int(float(sys.argv[3]) * 200)
 
-    label_index_ = {'emg_relax': 0, 'emg_index':1, 'emg_middle':2, 'emg_ring' :3, 'emg_little': 4, 'emg_spread':5, 'emg_wavein':6, 'emg_waveout':7}  
+    label_index = {'emg_relax': 0, 'emg_index':1, 'emg_middle':2, 'emg_ring' :3, 'emg_little': 4, 'emg_spread':5, 'emg_wavein':6, 'emg_waveout':7}  
     index_label = dict()
-    for key, val in label_index:
+    for key, val in label_index.items():
         index_label[val] = key 
 
     #index_label = {1 : 'emg_index_test', 2: 'emg_middle_test', 3: 'emg_ring_test', 4: 'emg_little_test', 5: 'emg_spread_test', 6: 'emg_idle_test'}
     emg_header = ['em1', 'em2', 'em3', 'em4', 'em5', 'em6', 'em7', 'em8']
-    stat_feature = ['_mean', '_median', '_var', '_meanCrossCount']
+    # stat_feature = ['_mean', '_median', '_var', '_meanCrossCount']
+    stat_feature = ['_mean', '_median', '_var']
     emgdf = pd.DataFrame(columns= emg_header)
     
     start = 0
