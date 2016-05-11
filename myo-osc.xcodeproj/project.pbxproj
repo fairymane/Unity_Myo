@@ -50,6 +50,7 @@
 		7221A82A1CE2F4DA00ABD995 /* MouseMover.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MouseMover.cpp; path = "../myo-mouse/MouseMover.cpp"; sourceTree = "<group>"; };
 		7221A82B1CE2F4DA00ABD995 /* MouseMover.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = MouseMover.hpp; path = "../myo-mouse/MouseMover.hpp"; sourceTree = "<group>"; };
 		7221A82C1CE2F4DA00ABD995 /* Utilities.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = Utilities.hpp; path = "../myo-mouse/Utilities.hpp"; sourceTree = "<group>"; };
+		7221A82E1CE2FB5D00ABD995 /* myo-mouse */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "myo-mouse"; path = "../../myo-mouse"; sourceTree = "<group>"; };
 		7264F88B1CCD5B4C00266B5A /* myo-osc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "myo-osc.cpp"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -91,6 +92,7 @@
 		4D1F5A97192655EE002845BB /* myo-osc */ = {
 			isa = PBXGroup;
 			children = (
+				7221A82E1CE2FB5D00ABD995 /* myo-mouse */,
 				2E43743719885228006D0623 /* OscOutboundPacketStream.cpp */,
 				2E43743819885228006D0623 /* OscPrintReceivedElements.cpp */,
 				2E43743919885228006D0623 /* OscReceivedElements.cpp */,
