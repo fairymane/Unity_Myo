@@ -188,8 +188,8 @@ if __name__ == "__main__":
 
     #print 'index_label: ', index_label
 
-    window_size = power_bit_length(window_size)
-    step_size = power_bit_length(step_size) 
+    # window_size = power_bit_length(window_size)
+    # step_size = power_bit_length(step_size) 
     print 'window_size: ', window_size, ' step_size, ', step_size   
     #index_label = {1 : 'emg_index_test', 2: 'emg_middle_test', 3: 'emg_ring_test', 4: 'emg_little_test', 5: 'emg_spread_test', 6: 'emg_idle_test'}
     emg_header = ['em1', 'em2', 'em3', 'em4', 'em5', 'em6', 'em7', 'em8']
