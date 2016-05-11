@@ -76,9 +76,12 @@ stream8 = Stream(
 
 
 #file_ = '/Users/taofeng/Dropbox/git/LayeredSensing/source/data/emg_data.csv'
-file_ = sys.argv[1]
-#df = pd.read_csv(file_, index_col = 'formatted_time').dropna()
-df = pickle.load(open(file_, "rb"))
+file_ = 'raw_' + sys.argv[1]
+print 'file_: ', file_
+hdf = pd.HDFStore('../data/gesture.h5')
+print 'hdf_keys: ', hdf.keys()
+
+df = hdf[file_] 
 print df.columns
 #df = df1[['timestamp','emg1','emg2','emg3','emg4','emg5','emg6','emg7']]
 #df.columns = ['emg1','emg2','emg3','emg4','emg5','emg6','emg7','emg8']
