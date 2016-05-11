@@ -1,6 +1,5 @@
 #!/usr/bin/python
 import pandas as pd
-#import matplotlib.pyplot as plt
 import numpy as np
 import time
 import datetime 
@@ -17,7 +16,6 @@ import math
 import pickle
 import OSC
 import os
-
 
 
 class bcolors:
@@ -50,7 +48,6 @@ def count_mean_crossing(df):
     d = df.shape[1]
     res = np.zeros(d)
     for i in xrange(d) :
-        #print 'i: ', i
         col = df[:, i]
         res[i] = np.count_nonzero(np.diff(np.sign(col))) 
     return res
@@ -94,29 +91,30 @@ def IMGHandler_realtimg(addr, tags, data, client_address):
     if count_imu == 4:
         
         oscmsg = OSC.OSCMessage()
-        oscmsg.setAddress("/dx")
-        oscmsg.append(dx_/4)
+        oscmsg.setAddress("/imu")
+
+        oscmsg.append([dx_/4, dy_/4, roll_/4, pitch_/4, yaw_/4] )
         OSC_Client.send(oscmsg)
 
-        oscmsg = OSC.OSCMessage()
-        oscmsg.setAddress("/dy")
-        oscmsg.append(dy_/4)
-        OSC_Client.send(oscmsg)
+        # oscmsg = OSC.OSCMessage()
+        # oscmsg.setAddress("/dy")
+        # oscmsg.append(dy_/4)
+        # OSC_Client.send(oscmsg)
 
-        oscmsg = OSC.OSCMessage()
-        oscmsg.setAddress("/roll")
-        oscmsg.append(roll_/4)
-        OSC_Client.send(oscmsg)
+        # oscmsg = OSC.OSCMessage()
+        # oscmsg.setAddress("/roll")
+        # oscmsg.append(roll_/4)
+        # OSC_Client.send(oscmsg)
 
-        oscmsg = OSC.OSCMessage()
-        oscmsg.setAddress("/pitch")
-        oscmsg.append(pitch_/4)
-        OSC_Client.send(oscmsg)
+        # oscmsg = OSC.OSCMessage()
+        # oscmsg.setAddress("/pitch")
+        # oscmsg.append(pitch_/4)
+        # OSC_Client.send(oscmsg)
 
-        oscmsg = OSC.OSCMessage()
-        oscmsg.setAddress("/yaw")
-        oscmsg.append(yaw_/4)
-        OSC_Client.send(oscmsg)
+        # oscmsg = OSC.OSCMessage()
+        # oscmsg.setAddress("/yaw")
+        # oscmsg.append(yaw_/4)
+        # OSC_Client.send(oscmsg)
 
         count_imu =0
         dx_ = 0
@@ -140,7 +138,6 @@ def EMGHandler_realtime(addr, tags, data, client_address):
     stime = vtime.strftime("%H:%M:%S.%f")  
     #txt += stime
     #txt += str(data)
-    
 
     emgdf.ix[stime] = data
     if end < emgdf.shape[0]:
@@ -161,7 +158,7 @@ def EMGHandler_realtime(addr, tags, data, client_address):
 
 
         #print 'test_res: ', test_res
-        print bcolors.OKBLUE + '\n\n #### quick predict: ' + index_label[res] + bcolors.ENDC
+        print bcolors.OKBLUE + '\npredict: ' + index_label[res] + bcolors.ENDC
 
         # prediction_bin[bin_count] = int(test_res[0] )
         # bin_count += 1
@@ -214,14 +211,8 @@ if __name__ == "__main__":
     for key, val in label_index.items():
         index_label[val] = key 
 
-    #print 'index_label: ', index_label
-
-    # window_size = power_bit_length(window_size)
-    # step_size = power_bit_length(step_size) 
     print 'window_size: ', window_size, ' step_size, ', step_size   
-    #index_label = {1 : 'emg_index_test', 2: 'emg_middle_test', 3: 'emg_ring_test', 4: 'emg_little_test', 5: 'emg_spread_test', 6: 'emg_idle_test'}
     emg_header = ['em1', 'em2', 'em3', 'em4', 'em5', 'em6', 'em7', 'em8']
-    # stat_feature = ['_mean', '_median', '_var', '_meanCrossCount']
     stat_feature = ['_mean', '_median', '_var']
     emgdf = pd.DataFrame(columns= emg_header)
     
