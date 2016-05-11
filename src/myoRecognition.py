@@ -88,12 +88,12 @@ def IMGHandler_realtimg(addr, tags, data, client_address):
     pitch_ += float(data[7])
     yaw_ += float(data[8])
     count_imu += 1
-    if count_imu == 4:
+    if count_imu == 8:
         
         oscmsg = OSC.OSCMessage()
         oscmsg.setAddress("/imu")
 
-        oscmsg.append([dx_/400, dy_/400, (roll_-34)/34, (pitch_-34)/34, (yaw_-34)/34] )
+        oscmsg.append([dx_/1200, dy_/1200, (roll_-68)/68, (pitch_-68)/68, (yaw_-68)/68] )
         OSC_Client.send(oscmsg)
 
         # oscmsg = OSC.OSCMessage()
@@ -132,7 +132,8 @@ def EMGHandler_realtime(addr, tags, data, client_address):
     global pca_
     global model_
     global index_label
-    global OSC_Client    
+    global OSC_Client
+    global flag    
     #txt = "OSCMessage '%s' from %s: " % (addr, client_address)
     vtime = datetime.datetime.now()
     stime = vtime.strftime("%H:%M:%S.%f")  
@@ -151,10 +152,13 @@ def EMGHandler_realtime(addr, tags, data, client_address):
         test_res = model_.predict(tmp_pca)
         res = int(test_res[0])
 
-        oscmsg = OSC.OSCMessage()
-        oscmsg.setAddress("/gesture")
-        oscmsg.append(res)
-        OSC_Client.send(oscmsg)
+        flag = not flag
+
+        if flag:
+            oscmsg = OSC.OSCMessage()
+            oscmsg.setAddress("/gesture")
+            oscmsg.append(res)
+            OSC_Client.send(oscmsg)
 
 
         #print 'test_res: ', test_res
@@ -162,7 +166,7 @@ def EMGHandler_realtime(addr, tags, data, client_address):
 
         # prediction_bin[bin_count] = int(test_res[0] )
         # bin_count += 1
-        # if bin_count>5:
+        # if bin_count>5: 
         #     bin_count = 0
         # print 'prediction_bin: ', prediction_bin    
         # res = np.argmax(np.bincount(prediction_bin)) 
@@ -200,12 +204,15 @@ if __name__ == "__main__":
     pitch_ = 0
     yaw_ = 0
 
+    flag = False
+
     window_size = power_bit_length(window_size)
     step_size  = power_bit_length(step_size)
         
-    label_index = {'emg_idle_s':0, 'emg_index_s': 1, 'emg_middle_s':2, 'emg_ring_s' :3, 'emg_little_s': 4, \
+    label_index = {'emg_idle_s':0, 'emg_index_s': 1, 'emg_index_d': 1, 'emg_ring_s' :3, \
     'emg_spread_s':5, 'emg_wavein_s' :6, \
-    'emg_waveout_s' :7, 'emg_fist_s' :8, 'emg_doubleTapping_d' :9}  # label_index
+    'emg_waveout_s' :7, 'emg_fist_s' :8, 'emg_fist_d' :8,  'emg_doubleTapping_d' :9}  # label_index
+
 
     index_label = dict()
     for key, val in label_index.items():

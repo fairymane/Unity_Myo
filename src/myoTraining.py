@@ -11,7 +11,7 @@ from sklearn import preprocessing, svm, tree
 from sknn.mlp import Classifier, Layer
 #from sklearn.neural_network import MLPClassifier
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.decomposition import PCA
+from sklearn.decomposition import PCA, KernelPCA
 from hmmlearn import hmm
 import math
 import pickle
@@ -233,10 +233,11 @@ def training_NN(df, alpha_val, hidden_layer ):
     return [pca_, nn_train]
 
 
-def training_random_forest(df, pca_comp = 0.6):
+def training_random_forest(df, pca_comp = 0.8):
     [df_train, train_label] = get_sample_label(df)
     num_component = int(math.ceil(df_train.shape[1] * pca_comp))
-    pca_ = PCA(n_components= num_component)
+    pca_ = PCA(n_components= num_component, whiten=True)
+    #pca_ = KernelPCA(n_components= num_component, kernel = 'rbf')
     pca_.fit(df_train)
     print 'df_train.shape ', df_train.shape
     df_train_pca =  pca_.transform(df_train) 
@@ -325,9 +326,10 @@ if __name__ == "__main__":
     # label_index = {'emg_idle_s':0, 'emg_index_s': 1, 'emg_middle_s':2, 'emg_ring_s' :3, 'emg_little_s': 4, \
     # 'emg_spread_s':5, 'emg_wavein_s' :6, \
     # 'emg_waveout_s' :7, 'emg_fist_s' :8, 'emg_doubleTapping_d' :9}  # label_index
-    label_index = {'emg_idle_s':0, 'emg_index_s': 1, 'emg_ring_s' :3, \
+    label_index = {'emg_idle_s':0, 'emg_index_s': 1, 'emg_index_d': 1, 'emg_ring_s' :3, \
     'emg_spread_s':5, 'emg_wavein_s' :6, \
-    'emg_waveout_s' :7, 'emg_fist_s' :8, 'emg_doubleTapping_d' :9}  # label_index
+    'emg_waveout_s' :7, 'emg_fist_s' :8, 'emg_fist_d' :8,  'emg_doubleTapping_d' :9}
+
     hdf_file_ = '../data/gesture.h5'
 
     if len(sys.argv) < 3:
