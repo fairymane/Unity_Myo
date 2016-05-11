@@ -82,7 +82,7 @@ stream9 = Stream(
 )
 
 
-file_ = 'raw_imu' + sys.argv[1]
+file_ = 'raw_imu_' + sys.argv[1]
 #df = pd.read_csv(file, index_col = 'formatted_time').dropna()
 print 'file_: ', file_
 hdf = pd.HDFStore('../data/gesture.h5')

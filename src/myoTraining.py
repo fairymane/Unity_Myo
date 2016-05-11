@@ -158,7 +158,6 @@ def testing_accuracy(test_data, test_label, pca_train, model_train, extract_test
     accuracy = float(n_test_sample- n_error ) / n_test_sample
 
     if get_accuracy:
-
         print 'accuracy: ', accuracy
     if activity:
         print 'test_res VS test_label\n', test_res, '\n', test_label

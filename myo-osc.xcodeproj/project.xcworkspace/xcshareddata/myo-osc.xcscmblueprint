@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "3BAE735CEACA98A2FBB29C261B7F9BA5A88BB85D",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "3BAE735CEACA98A2FBB29C261B7F9BA5A88BB85D" : 0,
+    "2E87801FA2BA42F6BBEE71631D7D4ACE07A81BB3" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "D193B8AF-E968-43B6-9145-DDFAA38739B5",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "3BAE735CEACA98A2FBB29C261B7F9BA5A88BB85D" : "Unity_Myo\/",
+    "2E87801FA2BA42F6BBEE71631D7D4ACE07A81BB3" : "myo-mouse\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "myo-osc",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "myo-osc.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/thalmiclabs\/myo-mouse.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "2E87801FA2BA42F6BBEE71631D7D4ACE07A81BB3"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/fairymane\/Unity_Myo.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "3BAE735CEACA98A2FBB29C261B7F9BA5A88BB85D"
+    }
+  ]
+}

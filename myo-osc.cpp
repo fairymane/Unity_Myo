@@ -32,6 +32,12 @@
 // add oscpack
 #include "osc/OscOutboundPacketStream.h"
 #include "ip/UdpSocket.h"
+#include "MouseMover.hpp"
+
+////This is for mouse movement on Windows
+//#pragma comment(lib, "user32") // or link to the library normally, this gets it done in one file for the sample
+//#include <Windows.h>
+
 
 #define OUTPUT_BUFFER_SIZE 1024
 
@@ -43,7 +49,7 @@ UdpTransmitSocket* transmitSocket;
 class DataCollector : public myo::DeviceListener {
 public:
     DataCollector()
-    : onArm(false), roll_w(0), pitch_w(0), yaw_w(0), currentPose()
+    : onArm(false), roll_w(0), pitch_w(0), yaw_w(0), currentPose(), mouse()
     {
     }
 
@@ -64,6 +70,19 @@ public:
         using std::atan2;
         using std::asin;
         using std::sqrt;
+        
+        mouse.onOrientation(quat);
+        
+        mouse.onGyroscope(gyro);
+        std::cout << '\r';
+        
+        // Print out the change in mouse position
+        float dx = mouse.dx();
+        float dy = mouse.dy();
+        std::cout << "dx: " << std::setw(5) << dx << "    dy: " << std::setw(5) << dy << std::endl;
+        //std::cout << std::flush;
+        moveMouse(dx, dy);
+        
 
         //std::cout<<"IMG fucntion called"<<std::endl;
         // Calculate Euler angles (roll, pitch, and yaw) from the unit quaternion.
@@ -73,22 +92,29 @@ public:
         float yaw = atan2(2.0f * (quat.w() * quat.z() + quat.x() * quat.y()),
                         1.0f - 2.0f * (quat.y() * quat.y() + quat.z() * quat.z()));
 
-        osc::OutboundPacketStream p(buffer, OUTPUT_BUFFER_SIZE);
-        p << osc::BeginMessage("/myo/IMG")
-        << a_x << a_y << a_z
-        << g_x << g_y << g_z 
-        << roll << pitch << yaw 
-        << quat.x() << quat.y() << quat.z() << quat.w() << osc::EndMessage;
-
-        transmitSocket->Send(p.Data(), p.Size());
         // Convert the floating point angles in radians to a scale from 0 to 20.
         roll_w = static_cast<int>((roll + (float)M_PI)/(M_PI * 2.0f) * 18);
         pitch_w = static_cast<int>((pitch + (float)M_PI/2.0f)/M_PI * 18);
         yaw_w = static_cast<int>((yaw + (float)M_PI)/(M_PI * 2.0f) * 18);
 
-
+        osc::OutboundPacketStream p(buffer, OUTPUT_BUFFER_SIZE);
+        p << osc::BeginMessage("/myo/IMG")
+        << a_x << a_y << a_z
+        << g_x << g_y << g_z
+        << roll_w << pitch_w << yaw_w
+        << quat.x() << quat.y() << quat.z() << quat.w() << osc::EndMessage;
+        
+        transmitSocket->Send(p.Data(), p.Size());
+        //////////
+        
     }
- 
+    
+    // Tell our MouseMover which way the Myo is being worn
+//    void onArmSync(myo::Myo* myo, uint64_t timestamp, myo::Arm arm, myo::XDirection xDirection, float rotation,
+//                   myo::WarmupState warmupState)
+//    {
+//        mouse.setXTowardsWrist(xDirection == myo::xDirectionTowardWrist);
+//    }
     
 	void onAccelerometerData(myo::Myo* myo, uint64_t timestamp, const myo::Vector3<float>& accel)
 	{
@@ -124,7 +150,9 @@ public:
         using std::atan2;
         using std::asin;
         using std::sqrt;
-
+        
+        //mouse.onOrientation(quat);
+        
         std::cout<<"orientation fucntion called"<<std::endl;
         // Calculate Euler angles (roll, pitch, and yaw) from the unit quaternion.
         float roll = atan2(2.0f * (quat.w() * quat.x() + quat.y() * quat.z()),
@@ -231,11 +259,25 @@ public:
         std::cout<< "row_w: "<<roll_w <<" pitch_w: "<<pitch_w << " yaw_w: "<<yaw_w; 
         std::cout << std::flush;
     }
+    
+    // Windows mouse movement code
+    void moveMouse(float dx, float dy) {
+//        std::cout<< "move mouse x by: "<<dx <<" and y by: " << dy << std::endl;
+//        INPUT input = { 0 };
+//        input.type = INPUT_MOUSE;
+//        
+//        input.mi.dx = (LONG)dx;
+//        input.mi.dy = (LONG)dy;
+//        
+//        input.mi.dwFlags = MOUSEEVENTF_MOVE;
+//        SendInput(1, &input, sizeof(INPUT));
+    }
+    
 
     // These values are set by onArmRecognized() and onArmLost() above.
     bool onArm;
     myo::Arm whichArm;
-
+    MouseMover mouse;
     // These values are set by onOrientationData() and onPose() above.
     int roll_w, pitch_w, yaw_w;
     float w, x, y, z, roll, pitch, yaw, a_x, a_y, a_z, g_x, g_y, g_z;
