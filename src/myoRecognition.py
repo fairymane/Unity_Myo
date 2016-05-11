@@ -19,6 +19,7 @@ import OSC
 import os
 
 
+
 class bcolors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -77,6 +78,31 @@ def IMGHandler_realtimg(addr, tags, data, client_address):
     #txt += str(data)
     #imgdf.ix[stime] = data;
     #print(txt)
+    global OSC_Client 
+    oscmsg = OSC.OSCMessage()
+    oscmsg.setAddress("/dx")
+    oscmsg.append(data[-2])
+    OSC_Client.send(oscmsg)
+
+    oscmsg = OSC.OSCMessage()
+    oscmsg.setAddress("/dy")
+    oscmsg.append(data[-1])
+    OSC_Client.send(oscmsg)
+
+    oscmsg = OSC.OSCMessage()
+    oscmsg.setAddress("/roll")
+    oscmsg.append(data[6])
+    OSC_Client.send(oscmsg)
+
+    oscmsg = OSC.OSCMessage()
+    oscmsg.setAddress("/pitch")
+    oscmsg.append(data[7])
+    OSC_Client.send(oscmsg)
+
+    oscmsg = OSC.OSCMessage()
+    oscmsg.setAddress("/yaw")
+    oscmsg.append(data[8])
+    OSC_Client.send(oscmsg)
     return
 
 def EMGHandler_realtime(addr, tags, data, client_address):
@@ -87,8 +113,7 @@ def EMGHandler_realtime(addr, tags, data, client_address):
     global pca_
     global model_
     global index_label
-    global prediction_bin
-    global bin_count
+    global OSC_Client    
     #txt = "OSCMessage '%s' from %s: " % (addr, client_address)
     vtime = datetime.datetime.now()
     stime = vtime.strftime("%H:%M:%S.%f")  
@@ -106,9 +131,16 @@ def EMGHandler_realtime(addr, tags, data, client_address):
         tmp_sample = np.array(tmp_sample).reshape(1, tmp_sample.shape[0] )
         tmp_pca =  pca_.transform(tmp_sample)
         test_res = model_.predict(tmp_pca)
+        res = int(test_res[0])
+
+        oscmsg = OSC.OSCMessage()
+        oscmsg.setAddress("/gesture_label")
+        oscmsg.append(res)
+        OSC_Client.send(oscmsg)
+
 
         #print 'test_res: ', test_res
-        print bcolors.OKBLUE + '\n\n #### quick predict: ' + index_label[int(test_res[0] )] + bcolors.ENDC
+        print bcolors.OKBLUE + '\n\n #### quick predict: ' + index_label[res] + bcolors.ENDC
 
         # prediction_bin[bin_count] = int(test_res[0] )
         # bin_count += 1
@@ -146,14 +178,15 @@ if __name__ == "__main__":
     window_size = power_bit_length(window_size)
     step_size  = power_bit_length(step_size)
         
-    label_index = {'emg_index_s': 1, 'emg_middle_s':2, 'emg_ring_s' :3, 'emg_little_s': 4, \
-    'emg_spread_s':5, 'emg_idle_s':6, 'emg_wavein_s' :7, 'emg_waveout_s' :8 , 'emg_fist_s' :9, 'emg_doubleTapping_d' :10}  # label_index    
+    label_index = {'emg_idle_s':0, 'emg_index_s': 1, 'emg_middle_s':2, 'emg_ring_s' :3, 'emg_little_s': 4, \
+    'emg_spread_s':5, 'emg_wavein_s' :6, \
+    'emg_waveout_s' :7, 'emg_fist_s' :8, 'emg_doubleTapping_d' :9}  # label_index
 
     index_label = dict()
     for key, val in label_index.items():
         index_label[val] = key 
 
-    print 'index_label: ', index_label
+    #print 'index_label: ', index_label
 
     window_size = power_bit_length(window_size)
     step_size = power_bit_length(step_size) 
@@ -166,9 +199,10 @@ if __name__ == "__main__":
     
     start = 0
     end = window_size
-    prediction_bin = np.array([6, 6, 6, 6, 6, 6, 6, 6])
-    bin_count = 0
     [pca_, model_] = pickle.load( open(model_file, "rb" ) )
+
+    OSC_Client = OSC.OSCClient()
+    OSC_Client.connect(('127.0.0.1', 8889))
 
     get_stream()
 

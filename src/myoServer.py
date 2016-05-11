@@ -68,7 +68,8 @@ def IMUHandler(addr, tags, data, client_address):
     # global count_imu
     # global window_imu
     # global imudf
-    # global sampleLen 
+    # global sampleLen
+    # global OSC_Client  
     # count_imu += 1
 
     # request_window = int(sys.argv[2])
@@ -81,8 +82,39 @@ def IMUHandler(addr, tags, data, client_address):
     # stime = vtime.strftime("%H:%M:%S.%f")  
     # #txt += stime
     # #txt += str(data)
-    # imudf.ix[stime] = data
-    # # countdown visual signal, every 0.1s
+
+    # #imudf.ix[stime] = data[:-2]
+
+    # #client.send( OSCMessage("/dx", dx) )
+    # #client.send( OSCMessage("/dx", dx) )
+
+    # oscmsg = OSC.OSCMessage()
+    # oscmsg.setAddress("/dx")
+    # oscmsg.append(data[-2])
+    # OSC_Client.send(oscmsg)
+
+    # oscmsg = OSC.OSCMessage()
+    # oscmsg.setAddress("/dy")
+    # oscmsg.append(data[-1])
+    # OSC_Client.send(oscmsg)
+
+    # oscmsg = OSC.OSCMessage()
+    # oscmsg.setAddress("/roll")
+    # oscmsg.append(data[6])
+    # OSC_Client.send(oscmsg)
+
+    # oscmsg = OSC.OSCMessage()
+    # oscmsg.setAddress("/pitch")
+    # oscmsg.append(data[7])
+    # OSC_Client.send(oscmsg)
+
+    # oscmsg = OSC.OSCMessage()
+    # oscmsg.setAddress("/yaw")
+    # oscmsg.append(data[8])
+    # OSC_Client.send(oscmsg)
+
+
+    # #countdown visual signal, every 0.1s
     # if count_imu % 20 == 0:
     #     print("".join(["#" for i in range(10 - int((count_imu-(window_imu-1)*sampleLen)/20))]))
 
@@ -118,12 +150,10 @@ if __name__ == "__main__":
     emg_header = ['em1', 'em2', 'em3', 'em4', 'em5', 'em6', 'em7', 'em8'] 
     emgdf = pd.DataFrame(columns= emg_header)
     imudf = pd.DataFrame(columns= imu_header )
-    #global count_img
-    #t_emg = threading.Thread(name='ploting_emg', target= plot_emg_1)
-    #t_emg.start()
 
-    #t_img = threading.Thread(name='ploting_img', target= plot_img)
-    #t_img.start()
+
     print 'filename: ', sys.argv[1],' sample count: ', sys.argv[2]
-    #offline_plot(sys.argv[1])
+
+    OSC_Client = OSC.OSCClient()
+    OSC_Client.connect(('127.0.0.1', 8889))
     get_stream()

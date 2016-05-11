@@ -322,9 +322,9 @@ def run_NN(hdf_file, label_index, alpha_val, hidden_layer):
 
 if __name__ == "__main__":
 
-    label_index = {'emg_index_s': 1, 'emg_middle_s':2, 'emg_ring_s' :3, 'emg_little_s': 4, \
-    'emg_spread_s':5, 'emg_idle_s':6, 'emg_wavein_s' :7, \
-    'emg_waveout_s' :8, 'emg_fist_s' :9, 'emg_doubleTapping_d' :10}  # label_index
+    label_index = {'emg_idle_s':0, 'emg_index_s': 1, 'emg_middle_s':2, 'emg_ring_s' :3, 'emg_little_s': 4, \
+    'emg_spread_s':5, 'emg_wavein_s' :6, \
+    'emg_waveout_s' :7, 'emg_fist_s' :8, 'emg_doubleTapping_d' :9}  # label_index
     hdf_file_ = '../data/gesture.h5'
 
     if len(sys.argv) < 3:

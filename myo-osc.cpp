@@ -79,9 +79,9 @@ public:
         // Print out the change in mouse position
         float dx = mouse.dx();
         float dy = mouse.dy();
-        std::cout << "dx: " << std::setw(5) << dx << "    dy: " << std::setw(5) << dy << std::endl;
+        //std::cout << "dx: " << std::setw(5) << dx << "    dy: " << std::setw(5) << dy << std::endl;
         //std::cout << std::flush;
-        moveMouse(dx, dy);
+        //moveMouse(dx, dy);
         
 
         //std::cout<<"IMG fucntion called"<<std::endl;
@@ -102,7 +102,7 @@ public:
         << a_x << a_y << a_z
         << g_x << g_y << g_z
         << roll_w << pitch_w << yaw_w
-        << quat.x() << quat.y() << quat.z() << quat.w() << osc::EndMessage;
+        << quat.x() << quat.y() << quat.z() << quat.w() <<dx  << dy << osc::EndMessage;
         
         transmitSocket->Send(p.Data(), p.Size());
         //////////
