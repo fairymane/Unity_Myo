@@ -335,11 +335,11 @@ if __name__ == "__main__":
         ws = 1
         ss =0.25  
     elif len(sys.argv)  == 4:
-        ws = float(sys.argv[2])
+        ws = float(sys.argv[3])
         ss = 0.25
     elif len(sys.argv)  == 5:
-        ws = float(sys.argv[2])
-        ss = float(sys.argv[2])
+        ws = float(sys.argv[3])
+        ss = float(sys.argv[4])
 
     if sys.argv[1] == '1':
         generate_window_feature(hdf_file_, ws, ss)
