@@ -28,38 +28,38 @@ def handler(addr, tags, data, client_address):
     print(txt)
 
 def EMGHandler(addr, tags, data, client_address):
-    # global count_emg
-    # global window
-    # global emgdf
-    # global sampleLen 
-    # count_emg += 1
+    global count_emg
+    global window
+    global emgdf
+    global sampleLen 
+    count_emg += 1
 
-    # if window  > int(sys.argv[2]) :
-    #    sys.exit()
+    if window  > int(sys.argv[2]) :
+       sys.exit()
 
-    # #txt = "OSCMessage '%s' from %s: " % (addr, client_address)
-    # vtime = datetime.datetime.now()
-    # #stime = vtime.strftime("%Y-%m-%d %H:%M:%S.%f")
-    # stime = vtime.strftime("%H:%M:%S.%f")  
-    # #txt += stime
-    # #txt += str(data)
-    # emgdf.ix[stime] = data
-    # # countdown visual signal, every 0.1s
-    # if count_emg % 20 == 0:
-    #     print("".join(["#" for i in range(10 - int((count_emg-(window-1)*sampleLen)/20))]))
+    #txt = "OSCMessage '%s' from %s: " % (addr, client_address)
+    vtime = datetime.datetime.now()
+    #stime = vtime.strftime("%Y-%m-%d %H:%M:%S.%f")
+    stime = vtime.strftime("%H:%M:%S.%f")  
+    #txt += stime
+    #txt += str(data)
+    emgdf.ix[stime] = data
+    # countdown visual signal, every 0.1s
+    if count_emg % 20 == 0:
+        print("".join(["#" for i in range(10 - int((count_emg-(window-1)*sampleLen)/20))]))
 
-    # if count_emg % sampleLen == 0:
-    #     print "\n\n\n########################EMG window number:  ", window, " count_emg = ",count_emg
-    #     window +=1
+    if count_emg % sampleLen == 0:
+        print "\n\n\n########################EMG window number:  ", window, " count_emg = ",count_emg
+        window +=1
 
-    # if count_emg == int(sampleLen*int(sys.argv[2])):
-    #     #pickle.dump(emgdf, open( sys.argv[1], "wb" ) )
-    #     hdf = pd.HDFStore('../data/gesture.h5')
-    #     emgdf = emgdf.convert_objects()
-    #     hdf.put('raw_' + sys.argv[1], emgdf, format='table', data_columns=True)
-    #     print 'hdf keys: ', hdf.keys()
-    #     hdf.close()
-    #     sys.exit()
+    if count_emg == int(sampleLen*int(sys.argv[2])):
+        #pickle.dump(emgdf, open( sys.argv[1], "wb" ) )
+        hdf = pd.HDFStore('../data/gesture.h5')
+        emgdf = emgdf.convert_objects()
+        hdf.put('raw_' + sys.argv[1], emgdf, format='table', data_columns=True)
+        print 'hdf keys: ', hdf.keys()
+        hdf.close()
+        sys.exit()
 
     #print(txt)
     return
@@ -75,12 +75,12 @@ def IMUHandler(addr, tags, data, client_address):
     # if window_imu  > request_window:
     #     sys.exit()
 
-    # txt = "OSCMessage '%s' from %s: " % (addr, client_address)
+    # #txt = "OSCMessage '%s' from %s: " % (addr, client_address)
     # vtime = datetime.datetime.now()
     # #stime = vtime.strftime("%Y-%m-%d %H:%M:%S.%f")
     # stime = vtime.strftime("%H:%M:%S.%f")  
     # #txt += stime
-    # txt += str(data)
+    # #txt += str(data)
     # imudf.ix[stime] = data
     # # countdown visual signal, every 0.1s
     # if count_imu % 20 == 0:
@@ -91,10 +91,9 @@ def IMUHandler(addr, tags, data, client_address):
     #     window_imu +=1
 
     # if count_imu == int(sampleLen*request_window):
-    #     pickle.dump(imudf, open( sys.argv[1], "wb" ) )
     #     hdf = pd.HDFStore('../data/gesture.h5')
     #     imudf = imudf.convert_objects()
-    #     hdf.put('raw_imu_' + sys.argv[1], imudf, format='table', data_columns=True)
+    #     hdf.put('raw_' + sys.argv[1], imudf, format='table', data_columns=True)
     #     print 'hdf keys: ', hdf.keys()
     #     hdf.close()
     #     sys.exit()

@@ -17,6 +17,13 @@ import math
 import pickle
 import os
 
+def power_bit_length(x):
+    return 2**(x-1).bit_length()
+
+def fft_feature(df, ws):
+    hamm_wind = np.hamming(ws)
+    tmp = np.absolute(np.fft.fft(df.multiply(hamm_wind, axis=0)) / sum(hamm_wind)  )
+    return tmp 
 
 def count_mean_crossing(df):
     """
@@ -30,25 +37,32 @@ def count_mean_crossing(df):
     d = df.shape[1]
     res = np.zeros(d)
     for i in xrange(d) :
-        col = df.ix[:, i].values
+        col = df[:, i]
         res[i] = np.count_nonzero(np.diff(np.sign(col))) 
     return res
    
+
 def generate_window_feature(hdf_file, ws, ss = None, fs = 200, pattern_name = 'NA'):
+    print 'retrive hdf5!'
     hdf = pd.HDFStore('../data/gesture.h5')
     hdf_keys = hdf.keys() 
-    stat_feature = ['_mean', '_median', '_var', '_meanCrossCount']
+    stat_feature = ['_mean', '_median', '_var', '_meanCrossCount', '_fmean', '_fmedian', '_fvar', '_fmeanCrossCount']
     if ss is None:
         # ss was not provided. the windows will not overlap in any direction.
         ss = ws * 0.25
     ss = int(ss * fs)
     ws = int(ws * fs)
 
+    ws = power_bit_length(ws)
+    ss = power_bit_length(ss)
+
     print 'hdf_keys: ', hdf_keys
-    for key in hdf_keys:
-        if 'raw_' in key:
-            #key = key.strip('/ ')
-            df = hdf[key]    
+    for key,val in label_index.items():
+        key = '/raw_'+ key
+
+        if key in hdf_keys:
+            print 'key: ', key
+            df = hdf[key]
             df_header = df.columns
             header = []
             for elm in stat_feature:
@@ -63,11 +77,14 @@ def generate_window_feature(hdf_file, ws, ss = None, fs = 200, pattern_name = 'N
             end = ws
             while end < df_len:
                 #print 'feature_df.ix[feature_df_count]: ', feature_df.ix[feature_df_count]
-                feature_df.ix[feature_df_count] = np.concatenate((df.ix[start:end].mean(0), df.ix[start:end].median(0), df.ix[start:end].var(0),  count_mean_crossing(df.ix[start:end]) ))
+                tmp = df.ix[start:end]
+                tmp_fft = fft_feature(tmp, ws)
+                feature_df.ix[feature_df_count] = np.concatenate((tmp.mean(0), tmp.median(0), tmp.var(0),  count_mean_crossing(tmp.as_matrix()), tmp_fft.mean(0), np.median(tmp_fft, axis=0), tmp_fft.var(0),  count_mean_crossing(tmp_fft) ))
                 feature_df_count +=1
 
                 start += ss
                 end += ss
+            print 'feature_df.shape: ', feature_df.shape
             feature_df = feature_df.convert_objects()    
             hdf.put(key[5:], feature_df, format='table', data_columns=True)
     hdf.close()        
@@ -216,12 +233,14 @@ def training_NN(df, alpha_val, hidden_layer ):
     return [pca_, nn_train]
 
 
-def training_random_forest(df, pca_comp = 0.4):
+def training_random_forest(df, pca_comp = 0.6):
     [df_train, train_label] = get_sample_label(df)
     num_component = int(math.ceil(df_train.shape[1] * pca_comp))
     pca_ = PCA(n_components= num_component)
     pca_.fit(df_train)
+    print 'df_train.shape ', df_train.shape
     df_train_pca =  pca_.transform(df_train) 
+    print 'df_train_pca.shape ', df_train_pca.shape
     rf_train = RandomForestClassifier(n_estimators=100).fit(df_train_pca, train_label )
 
     return [pca_, rf_train]
@@ -249,7 +268,12 @@ def run_random_forest(hdf_file, label_index):
     [test_data, test_label] = get_sample_label(df_test)
     print 'test_data shape: ', test_data.shape
     [pca_, model_] = training_random_forest(df_train)
-    with open('../data/random_forest.p', 'wb') as f:
+    model_file = '../data/random_forest.p'
+    try:
+        os.remove(model_file)
+    except OSError:
+        pass
+    with open(model_file, 'wb') as f:
         pickle.dump([pca_, model_], f)
     testing_accuracy(test_data, test_label, pca_, model_, get_accuracy = True)
 
@@ -298,7 +322,9 @@ def run_NN(hdf_file, label_index, alpha_val, hidden_layer):
 
 if __name__ == "__main__":
 
-    label_index_ = {'emg_index_test': 1, 'emg_middle_test':2, 'emg_ring_test' :3, 'emg_little_test': 4, 'emg_spread_test':5, 'emg_idle_test':6}  # label_index
+    label_index = {'emg_index_s': 1, 'emg_middle_s':2, 'emg_ring_s' :3, 'emg_little_s': 4, \
+    'emg_spread_s':5, 'emg_idle_s':6, 'emg_wavein_s' :7, \
+    'emg_waveout_s' :8, 'emg_fist_s' :9, 'emg_doubleTapping_d' :10}  # label_index
     hdf_file_ = '../data/gesture.h5'
 
     if len(sys.argv) < 3:
@@ -313,23 +339,23 @@ if __name__ == "__main__":
         ss = 0.25
     elif len(sys.argv)  == 5:
         ws = float(sys.argv[2])
-        mss = float(sys.argv[2])
+        ss = float(sys.argv[2])
 
-    if sys.argv[1] == '1':       
+    if sys.argv[1] == '1':
         generate_window_feature(hdf_file_, ws, ss)
 
     clf_name = sys.argv[2]
     if clf_name == 'rf':
-        run_random_forest(hdf_file_, label_index_)
+        run_random_forest(hdf_file_, label_index)
     if clf_name == 'nn':
-        run_NN(hdf_file_, label_index_, alpha_val = 1e-4, hidden_layer = (100, 5) )
+        run_NN(hdf_file_, label_index, alpha_val = 1e-4, hidden_layer = (100, 5) )
 
-    #run_random_forest(hdf_file_, label_index_)
+    #run_random_forest(hdf_file_, label_index)
     
-    #run_hmm(hdf_file_, label_index_)
-    #run_svm(hdf_file_, label_index_)
-    #run_decision_tree(hdf_file_, label_index_)
-    #run_NN(hdf_file_, label_index_, alpha_val = 1e-3, hidden_layer = (60, 5) )
+    #run_hmm(hdf_file_, label_index)
+    #run_svm(hdf_file_, label_index)
+    #run_decision_tree(hdf_file_, label_index)
+    #run_NN(hdf_file_, label_index, alpha_val = 1e-3, hidden_layer = (60, 5) )
     
 
 
