@@ -93,7 +93,7 @@ def IMGHandler_realtimg(addr, tags, data, client_address):
         oscmsg = OSC.OSCMessage()
         oscmsg.setAddress("/imu")
 
-        oscmsg.append([dx_/4, dy_/4, roll_/4, pitch_/4, yaw_/4] )
+        oscmsg.append([dx_/400, dy_/400, (roll_-34)/34, (pitch_-34)/34, (yaw_-34)/34] )
         OSC_Client.send(oscmsg)
 
         # oscmsg = OSC.OSCMessage()
@@ -152,7 +152,7 @@ def EMGHandler_realtime(addr, tags, data, client_address):
         res = int(test_res[0])
 
         oscmsg = OSC.OSCMessage()
-        oscmsg.setAddress("/gesture_label")
+        oscmsg.setAddress("/gesture")
         oscmsg.append(res)
         OSC_Client.send(oscmsg)
 

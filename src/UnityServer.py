@@ -17,7 +17,7 @@ def get_stream():
     # s.addMsgHandler('/pitch', handler) 
     # s.addMsgHandler('/yaw', handler)
     s.addMsgHandler("/imu", handler) 
-    s.addMsgHandler("/gesture_label", handler) 
+    s.addMsgHandler("/gesture", handler) 
     s.serve_forever()
 
 if __name__ == "__main__":
