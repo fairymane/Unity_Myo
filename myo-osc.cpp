@@ -65,7 +65,7 @@ public:
         using std::asin;
         using std::sqrt;
 
-        std::cout<<"IMG fucntion called"<<std::endl;
+        //std::cout<<"IMG fucntion called"<<std::endl;
         // Calculate Euler angles (roll, pitch, and yaw) from the unit quaternion.
         float roll = atan2(2.0f * (quat.w() * quat.x() + quat.y() * quat.z()),
                            1.0f - 2.0f * (quat.x() * quat.x() + quat.y() * quat.y()));
