@@ -67,7 +67,12 @@ def handler_realtime(addr, tags, data, client_address):
     return
 
 def IMGHandler_realtimg(addr, tags, data, client_address):
-    #global count_img
+    global count_imu
+    global dx_
+    global dy_
+    global roll_
+    global pitch_
+    global yaw_
     #count_img += 1
     #if count_img > 300:
     #    sys.exit()
@@ -78,31 +83,47 @@ def IMGHandler_realtimg(addr, tags, data, client_address):
     #txt += str(data)
     #imgdf.ix[stime] = data;
     #print(txt)
-    global OSC_Client 
-    oscmsg = OSC.OSCMessage()
-    oscmsg.setAddress("/dx")
-    oscmsg.append(data[-2])
-    OSC_Client.send(oscmsg)
+    global OSC_Client
 
-    oscmsg = OSC.OSCMessage()
-    oscmsg.setAddress("/dy")
-    oscmsg.append(data[-1])
-    OSC_Client.send(oscmsg)
+    dx_ += float(data[-2])
+    dy_ += float(data[-1])
+    roll_ += float(data[6])
+    pitch_ += float(data[7])
+    yaw_ += float(data[8])
+    count_imu += 1
+    if count_imu == 4:
+        
+        oscmsg = OSC.OSCMessage()
+        oscmsg.setAddress("/dx")
+        oscmsg.append(dx_/4)
+        OSC_Client.send(oscmsg)
 
-    oscmsg = OSC.OSCMessage()
-    oscmsg.setAddress("/roll")
-    oscmsg.append(data[6])
-    OSC_Client.send(oscmsg)
+        oscmsg = OSC.OSCMessage()
+        oscmsg.setAddress("/dy")
+        oscmsg.append(dy_/4)
+        OSC_Client.send(oscmsg)
 
-    oscmsg = OSC.OSCMessage()
-    oscmsg.setAddress("/pitch")
-    oscmsg.append(data[7])
-    OSC_Client.send(oscmsg)
+        oscmsg = OSC.OSCMessage()
+        oscmsg.setAddress("/roll")
+        oscmsg.append(roll_/4)
+        OSC_Client.send(oscmsg)
 
-    oscmsg = OSC.OSCMessage()
-    oscmsg.setAddress("/yaw")
-    oscmsg.append(data[8])
-    OSC_Client.send(oscmsg)
+        oscmsg = OSC.OSCMessage()
+        oscmsg.setAddress("/pitch")
+        oscmsg.append(pitch_/4)
+        OSC_Client.send(oscmsg)
+
+        oscmsg = OSC.OSCMessage()
+        oscmsg.setAddress("/yaw")
+        oscmsg.append(yaw_/4)
+        OSC_Client.send(oscmsg)
+
+        count_imu =0
+        dx_ = 0
+        dy_ = 0
+        roll_ = 0
+        pitch_ = 0
+        yaw_ = 0
     return
 
 def EMGHandler_realtime(addr, tags, data, client_address):
@@ -174,6 +195,13 @@ if __name__ == "__main__":
         window_size = int(float(sys.argv[2]) * 200) # frequency is 200
     if len(sys.argv) > 3:
         step_size = int(float(sys.argv[3]) * 200)
+
+    count_imu = 0
+    dx_ = 0
+    dy_ = 0
+    roll_ = 0
+    pitch_ = 0
+    yaw_ = 0
 
     window_size = power_bit_length(window_size)
     step_size  = power_bit_length(step_size)
